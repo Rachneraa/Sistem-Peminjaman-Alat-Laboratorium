@@ -15,7 +15,7 @@
         <div class="flex-1 min-w-[200px]">
             <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Filter Status</label>
             <select name="status" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
-                <option value="">Semua (Menunggu & Disetujui)</option>
+                <option value="">Semua (Menunggu, Disetujui & Aktif)</option>
                 <option value="menunggu" <?php echo e(request('status') == 'menunggu' ? 'selected' : ''); ?>>Menunggu Persetujuan</option>
                 <option value="disetujui" <?php echo e(request('status') == 'disetujui' ? 'selected' : ''); ?>>Sudah Disetujui</option>
             </select>

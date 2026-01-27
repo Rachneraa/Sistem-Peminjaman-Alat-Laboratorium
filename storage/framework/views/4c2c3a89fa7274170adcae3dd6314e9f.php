@@ -45,9 +45,10 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                         <?php
-                            $estimatedFine = $borrowing->status == 'disetujui' ? $borrowing->calculateEstimatedFine() : ['denda' => 0, 'terlambat_hari' => 0];
+                            $showFine = in_array($borrowing->status, ['disetujui', 'menunggu_pengembalian']);
+                            $estimatedFine = $showFine ? $borrowing->calculateEstimatedFine() : ['denda' => 0, 'terlambat_hari' => 0];
                         ?>
-                        <?php if($borrowing->status == 'disetujui'): ?>
+                        <?php if($showFine): ?>
                             <?php if($estimatedFine['denda'] > 0): ?>
                                 <div class="text-red-500 dark:text-red-400 font-semibold">Rp <?php echo e(number_format($estimatedFine['denda'], 0, ',', '.')); ?></div>
                                 <div class="text-xs text-red-400 dark:text-red-300"><?php echo e($estimatedFine['terlambat_hari']); ?> hari terlambat</div>

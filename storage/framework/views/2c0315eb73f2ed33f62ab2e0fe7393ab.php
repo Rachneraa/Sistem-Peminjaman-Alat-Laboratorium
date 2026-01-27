@@ -102,20 +102,20 @@
                 </svg>
             </div>
             <div class="flex-1">
-                <h3 class="font-semibold text-white mb-1">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-1">
                     <?php if($isDueToday): ?>
                         ⚠️ Kembalikan Hari Ini!
                     <?php else: ?>
                         ⏰ Jatuh Tempo Terdekat
                     <?php endif; ?>
                 </h3>
-                <p class="text-gray-300 text-sm">
+                <p class="text-gray-600 dark:text-gray-300 text-sm">
                     Peminjaman #<?php echo e($nearest_due->id); ?> - 
                     Jatuh tempo: <strong><?php echo e($nearest_due->jatuh_tempo->format('d/m/Y')); ?></strong>
                     <?php if($isDueToday): ?>
-                        <span class="text-orange-400">(Hari ini)</span>
+                        <span class="text-orange-500 dark:text-orange-400">(Hari ini)</span>
                     <?php else: ?>
-                        <span class="text-yellow-400">(<?php echo e($daysUntilDue); ?> hari lagi)</span>
+                        <span class="text-yellow-600 dark:text-yellow-400">(<?php echo e(abs(round($daysUntilDue))); ?> hari lagi)</span>
                     <?php endif; ?>
                 </p>
                 <a href="<?php echo e(route('peminjam.borrowings.show', $nearest_due)); ?>" class="text-blue-400 hover:text-blue-300 text-sm mt-2 inline-flex items-center gap-1">

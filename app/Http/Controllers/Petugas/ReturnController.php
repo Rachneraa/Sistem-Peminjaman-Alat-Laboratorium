@@ -19,9 +19,10 @@ class ReturnController extends Controller
      */
     public function index(Request $request)
     {
-        // Tampilkan yang menunggu persetujuan pengembalian
+        // Tampilkan yang menunggu persetujuan pengembalian DAN yang masih aktif (disetujui)
+        // Agar petugas bisa memantau denda dan keterlambatan
         $query = Borrowing::with(['user', 'borrowingDetails.tool.category', 'return'])
-            ->where('status', 'menunggu_pengembalian');
+            ->whereIn('status', ['menunggu_pengembalian', 'disetujui']);
 
         // Filter berdasarkan status terlambat
         if ($request->has('filter')) {
@@ -47,9 +48,9 @@ class ReturnController extends Controller
      */
     public function processReturn(Request $request, Borrowing $borrowing)
     {
-        // Validasi: hanya yang menunggu pengembalian yang bisa diproses
-        if ($borrowing->status !== 'menunggu_pengembalian') {
-            return back()->with('error', 'Hanya pengembalian yang menunggu persetujuan yang bisa diproses.');
+        // Validasi: yang menunggu pengembalian atau yang aktif (untuk return manual)
+        if (!in_array($borrowing->status, ['menunggu_pengembalian', 'disetujui'])) {
+            return back()->with('error', 'Hanya pengembalian yang menunggu persetujuan atau aktif yang bisa diproses.');
         }
 
         $validated = $request->validate([

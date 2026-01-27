@@ -4,15 +4,15 @@
 
 @section('content')
 <div class="max-w-4xl mx-auto">
-    <div class="mb-6 flex justify-between items-center">
+    <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">Detail Pengembalian</h1>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white uppercase tracking-wider">Detail Pengembalian</h1>
             <div class="flex items-center gap-3 mt-2">
                 <div class="h-1 w-16 bg-primary"></div>
                 <span class="text-sm text-gray-500 dark:text-gray-400 font-mono">#{{ $return->id }}</span>
             </div>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
             <a href="{{ route('admin.returns.index') }}" class="px-5 py-2.5 bg-transparent border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-all flex items-center gap-2 font-medium">
                 <span class="material-symbols-outlined text-[20px]">arrow_back</span>
                 Kembali

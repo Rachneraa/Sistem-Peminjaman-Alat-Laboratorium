@@ -23,8 +23,8 @@ class BorrowingController extends Controller
         if ($request->has('status') && $request->status) {
             $query->where('status', $request->status);
         } else {
-            // Default: tampilkan yang menunggu dan disetujui
-            $query->whereIn('status', ['menunggu', 'disetujui']);
+            // Default: tampilkan yang menunggu, disetujui, dan menunggu pengembalian (aktif)
+            $query->whereIn('status', ['menunggu', 'disetujui', 'menunggu_pengembalian']);
         }
 
         $borrowings = $query->latest()->paginate(15);
@@ -125,9 +125,9 @@ class BorrowingController extends Controller
             'pesan' => 'nullable|string|max:500',
         ]);
 
-        // Hanya bisa kirim reminder untuk peminjaman yang disetujui
-        if ($borrowing->status !== 'disetujui') {
-            return back()->with('error', 'Hanya bisa mengirim pengingat untuk peminjaman yang disetujui.');
+        // Hanya bisa kirim reminder untuk peminjaman yang disetujui atau menunggu pengembalian
+        if (!in_array($borrowing->status, ['disetujui', 'menunggu_pengembalian'])) {
+            return back()->with('error', 'Hanya bisa mengirim pengingat untuk peminjaman yang disetujui atau menunggu pengembalian.');
         }
 
         // Kirim notifikasi pengingat
@@ -147,9 +147,9 @@ class BorrowingController extends Controller
      */
     public function sendFineNotification(Borrowing $borrowing)
     {
-        // Hanya bisa kirim notifikasi denda untuk peminjaman yang disetujui
-        if ($borrowing->status !== 'disetujui') {
-            return back()->with('error', 'Hanya bisa mengirim notifikasi denda untuk peminjaman yang disetujui.');
+        // Hanya bisa kirim notifikasi denda untuk peminjaman yang disetujui atau menunggu pengembalian
+        if (!in_array($borrowing->status, ['disetujui', 'menunggu_pengembalian'])) {
+            return back()->with('error', 'Hanya bisa mengirim notifikasi denda untuk peminjaman yang disetujui atau menunggu pengembalian.');
         }
 
         // Hitung estimasi denda

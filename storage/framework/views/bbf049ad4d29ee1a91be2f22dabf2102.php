@@ -15,7 +15,7 @@
         <div class="flex-1 min-w-[200px]">
             <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Filter</label>
             <select name="filter" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
-                <option value="">Semua Pengembalian Menunggu</option>
+                <option value="">Semua (Aktif & Menunggu)</option>
                 <option value="terlambat" <?php echo e(request('filter') == 'terlambat' ? 'selected' : ''); ?>>Terlambat</option>
             </select>
         </div>

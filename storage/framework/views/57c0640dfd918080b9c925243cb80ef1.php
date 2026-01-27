@@ -1,17 +1,17 @@
 <!-- Confirm Modal Component -->
 <div id="confirmModal" class="hidden fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-    <div class="relative bg-gray-800 border border-gray-700 rounded-xl shadow-2xl max-w-md w-full transform transition-all">
+    <div class="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-w-md w-full transform transition-all">
         <!-- Modal Header -->
-        <div class="flex items-center justify-between p-6 border-b border-gray-700">
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center gap-3">
                 <div id="confirmIcon" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                     </svg>
                 </div>
-                <h3 id="confirmTitle" class="text-lg font-bold text-white">Konfirmasi</h3>
+                <h3 id="confirmTitle" class="text-lg font-bold text-gray-900 dark:text-white">Konfirmasi</h3>
             </div>
-            <button onclick="closeConfirmModal()" class="text-gray-400 hover:text-gray-300 transition">
+            <button onclick="closeConfirmModal()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -20,10 +20,10 @@
 
         <!-- Modal Body -->
         <div class="p-6">
-            <p id="confirmMessage" class="text-gray-300 mb-6"></p>
+            <p id="confirmMessage" class="text-gray-600 dark:text-gray-300 mb-6"></p>
             
             <div class="flex justify-end gap-3">
-                <button onclick="closeConfirmModal()" id="confirmCancelBtn" class="btn btn-secondary px-6">
+                <button onclick="closeConfirmModal()" id="confirmCancelBtn" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 rounded-lg transition font-medium">
                     Batal
                 </button>
                 <button onclick="confirmAction()" id="confirmOkBtn" class="btn px-6 inline-flex items-center gap-2">

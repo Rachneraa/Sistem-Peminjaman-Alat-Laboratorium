@@ -31,6 +31,13 @@
     <style>
         body {
             font-family: 'Space Grotesk', sans-serif;
+            background-color: #f7f7f7;
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .dark body {
+            background-color: #141414;
+            background-image: radial-gradient(#333 1px, transparent 1px);
         }
         .industrial-border {
             border-left: 4px solid #0d5868;
@@ -44,6 +51,23 @@
             background: rgba(13, 88, 104, 0.3);
             border-left: 4px solid #8EFF00;
             color: #8EFF00;
+        }
+        /* Textures */
+        .sidebar-texture {
+            background-color: #ffffff;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(13, 88, 104, 0.02) 10px, rgba(13, 88, 104, 0.02) 20px);
+        }
+        .dark .sidebar-texture {
+            background-color: #212121;
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.01) 10px, rgba(255, 255, 255, 0.01) 20px);
+        }
+        .navbar-texture {
+            background-image: linear-gradient(to right, rgba(13, 88, 104, 0.03) 1px, transparent 1px);
+            background-size: 40px 100%;
+        }
+        .dark .navbar-texture {
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 100%;
         }
         /* Custom Scrollbar */
         /* Custom Scrollbar - Global */
@@ -116,7 +140,8 @@
     @auth
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-[60] w-64 bg-white dark:bg-panel-dark border-r border-gray-200 dark:border-white/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar-texture fixed lg:static inset-y-0 left-0 z-[60] w-64 border-r border-gray-200 dark:border-white/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
             <div class="flex flex-col h-full">
                 <!-- Logo -->
                 <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-white/5">
@@ -244,7 +269,7 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
             <!-- Top Bar -->
-            <header class="sticky top-0 z-50 bg-white/95 dark:bg-panel-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-white/5 shadow-lg">
+            <header class="navbar-texture sticky top-0 z-50 bg-white/95 dark:bg-panel-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-white/5 shadow-lg">
                 <div class="flex items-center justify-between h-16 px-4 lg:px-6">
                     <div class="flex items-center gap-4">
                         <button id="sidebar-toggle" class="lg:hidden text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
@@ -272,45 +297,51 @@
             <!-- Page Content -->
             <main class="flex-1 p-4 lg:p-6 overflow-y-auto">
                 <!-- Alerts -->
-                @if(session('success'))
-                    <div class="mb-6 p-4 bg-green-500/10 border-l-4 border-green-500 rounded-lg industrial-border">
-                        <div class="flex items-start gap-3">
-                            <span class="material-symbols-outlined text-green-400">check_circle</span>
-                            <div>
-                                <p class="font-semibold text-green-200">Berhasil</p>
-                                <p class="text-sm text-green-300">{{ session('success') }}</p>
+                <!-- Toast Container -->
+                <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-3 min-w-[300px] max-w-sm pointer-events-none">
+                    @if(session('success'))
+                        <div class="toast bg-white dark:bg-panel-dark border-l-4 border-green-500 shadow-lg rounded-r-lg p-4 flex items-start gap-3 pointer-events-auto transform transition-all duration-300 translate-x-0 industrial-border">
+                            <span class="material-symbols-outlined text-green-500">check_circle</span>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white">Berhasil</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ session('success') }}</p>
                             </div>
+                            <button onclick="this.closest('.toast').remove()" class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
                         </div>
-                    </div>
-                @endif
+                    @endif
 
-                @if(session('error'))
-                    <div class="mb-6 p-4 bg-red-500/10 border-l-4 border-red-500 rounded-lg">
-                        <div class="flex items-start gap-3">
-                            <span class="material-symbols-outlined text-red-400">error</span>
-                            <div>
-                                <p class="font-semibold text-red-200">Terjadi Kesalahan</p>
-                                <p class="text-sm text-red-300">{{ session('error') }}</p>
+                    @if(session('error'))
+                        <div class="toast bg-white dark:bg-panel-dark border-l-4 border-red-500 shadow-lg rounded-r-lg p-4 flex items-start gap-3 pointer-events-auto transform transition-all duration-300 translate-x-0">
+                            <span class="material-symbols-outlined text-red-500">error</span>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white">Terjadi Kesalahan</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ session('error') }}</p>
                             </div>
+                            <button onclick="this.closest('.toast').remove()" class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
                         </div>
-                    </div>
-                @endif
+                    @endif
 
-                @if($errors->any())
-                    <div class="mb-6 p-4 bg-yellow-500/10 border-l-4 border-yellow-500 rounded-lg">
-                        <div class="flex items-start gap-3">
-                            <span class="material-symbols-outlined text-yellow-400">warning</span>
-                            <div>
-                                <p class="font-semibold text-yellow-200">Perlu Perhatian</p>
-                                <ul class="mt-1 list-disc list-inside text-sm text-yellow-300 space-y-1">
+                    @if($errors->any())
+                        <div class="toast bg-white dark:bg-panel-dark border-l-4 border-yellow-500 shadow-lg rounded-r-lg p-4 flex items-start gap-3 pointer-events-auto transform transition-all duration-300 translate-x-0">
+                            <span class="material-symbols-outlined text-yellow-500">warning</span>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white">Perlu Perhatian</h4>
+                                <ul class="mt-1 list-disc list-inside text-sm text-gray-600 dark:text-gray-300 space-y-1">
                                     @foreach($errors->all() as $error)
                                         <li>{{ $error }}</li>
                                     @endforeach
                                 </ul>
                             </div>
+                            <button onclick="this.closest('.toast').remove()" class="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                                <span class="material-symbols-outlined text-[18px]">close</span>
+                            </button>
                         </div>
-                    </div>
-                @endif
+                    @endif
+                </div>
 
                 @yield('content')
             </main>
@@ -353,14 +384,15 @@
                 sidebarOverlay.addEventListener('click', closeSidebar);
             }
 
-            // Auto-hide alerts
-            const alerts = document.querySelectorAll('[class*="border-l-4"]');
-            alerts.forEach(alert => {
+            // Auto-hide toasts (3 seconds)
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(toast => {
+                // Add slide-in animation class on load if needed, but default is visible
+                // Wait 3 seconds then hide
                 setTimeout(() => {
-                    alert.style.transition = 'opacity 0.5s';
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 500);
-                }, 5000);
+                    toast.classList.add('translate-x-full', 'opacity-0');
+                    setTimeout(() => toast.remove(), 300); // Wait for transition
+                }, 3000);
             });
         });
 

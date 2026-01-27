@@ -86,10 +86,26 @@
                                 {{ ucfirst($borrowing->status) }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-white">
-                            @if($borrowing->return && $borrowing->return->denda > 0)
-                                <span class="text-red-500 dark:text-red-400 font-semibold">Rp {{ number_format($borrowing->return->denda, 0, ',', '.') }}</span>
-                                <span class="text-gray-500 dark:text-gray-400 text-xs block">({{ $borrowing->return->terlambat_hari }} hari)</span>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                            @if($borrowing->return)
+                                @php
+                                    $dendaTerlambat = $borrowing->return->denda;
+                                    $dendaKerusakan = $borrowing->return->denda_kerusakan ?? 0;
+                                    $totalDenda = $dendaTerlambat + $dendaKerusakan;
+                                @endphp
+                                @if($totalDenda > 0)
+                                    <div class="font-semibold text-red-500 dark:text-red-400">Rp {{ number_format($totalDenda, 0, ',', '.') }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                        @if($dendaTerlambat > 0)
+                                            Terlambat: Rp {{ number_format($dendaTerlambat, 0, ',', '.') }}<br>
+                                        @endif
+                                        @if($dendaKerusakan > 0)
+                                            Kerusakan: Rp {{ number_format($dendaKerusakan, 0, ',', '.') }}
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="text-green-500 dark:text-green-400">Rp 0</span>
+                                @endif
                             @else
                                 <span class="text-gray-400 dark:text-gray-500">-</span>
                             @endif
