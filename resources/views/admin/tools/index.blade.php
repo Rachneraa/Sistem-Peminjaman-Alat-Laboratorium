@@ -24,126 +24,156 @@
     </div>
 </div>
 
-<!-- Filter & Pencarian -->
-<!-- Filter & Pencarian -->
-<div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl p-6 mb-6 industrial-border">
-    <form method="GET" action="{{ route('admin.tools.index') }}" class="flex flex-wrap gap-4">
-        <div class="flex-1 min-w-[200px]">
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Cari</label>
-            <div class="relative">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama alat..." class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 pl-10 placeholder-gray-400 dark:placeholder-gray-500 transition-all">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500 text-[20px]">search</span>
-                </div>
+@php
+    $activeFiltersCount = collect(request()->only(['search', 'kategori_id', 'status']))->filter()->count();
+@endphp
+
+<x-filter-panel :action="route('admin.tools.index')" :activeFiltersCount="$activeFiltersCount">
+    <div>
+        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Cari Nama / Deskripsi</label>
+        <div class="relative group">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama alat..." class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 pl-10 transition-all group-hover:border-gray-400 dark:group-hover:border-gray-600">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 dark:text-gray-500 group-hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-[20px]">search</span>
             </div>
         </div>
-        <div class="flex-1 min-w-[150px]">
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Kategori</label>
-            <select name="kategori_id" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
-                <option value="">Semua Kategori</option>
-                @foreach($categories as $category)
-                    <option value="{{ $category->id }}" {{ request('kategori_id') == $category->id ? 'selected' : '' }}>
-                        {{ $category->nama_kategori }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="flex-1 min-w-[150px]">
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Status</label>
-            <select name="status" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
-                <option value="">Semua Status</option>
-                <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
-                <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-                <option value="rusak" {{ request('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
-                <option value="perbaikan" {{ request('status') == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
-            </select>
-        </div>
-        <div class="flex items-end gap-2 pb-[1px]">
-            <button type="submit" class="h-[42px] px-6 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
-                Cari
-            </button>
-            <a href="{{ route('admin.tools.index') }}" class="h-[42px] px-4 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all font-medium">
-                <span class="material-symbols-outlined text-[20px] mr-1">refresh</span>
-                Reset
-            </a>
-        </div>
-    </form>
-</div>
+    </div>
 
-<div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl overflow-hidden industrial-border">
-    <div class="overflow-auto max-h-[75vh]">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">
+    <div>
+        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Kategori</label>
+        <select name="kategori_id" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
+            <option value="">Semua Kategori</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}" {{ request('kategori_id') == $category->id ? 'selected' : '' }}>
+                    {{ $category->nama_kategori }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div>
+        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Status Ketersediaan</label>
+        <select name="status" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
+            <option value="">Semua Status</option>
+            <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+            <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
+            <option value="rusak" {{ request('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
+            <option value="perbaikan" {{ request('status') == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
+        </select>
+    </div>
+    
+    <div>
+        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Urutan</label>
+        <select name="sort" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
+            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Terbaru</option>
+            <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Nama (A-Z)</option>
+            <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Nama (Z-A)</option>
+            <option value="stock_low" {{ request('sort') == 'stock_low' ? 'selected' : '' }}>Stok Terendah</option>
+        </select>
+    </div>
+</x-filter-panel>
+
+<x-card class="overflow-hidden" :padding="false">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-white/5">
+            <thead class="bg-gray-50 dark:bg-panel-dark sticky top-0 z-10 border-b border-gray-200 dark:border-white/5">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Nama Alat</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Kategori</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Stok</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Aksi</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Informasi Alat</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Kategori</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Inventori</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Status</th>
+                    <th class="px-6 py-4 text-right text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody class="divide-y divide-gray-200 dark:divide-white/5">
                 @forelse($tools as $tool)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ $tool->nama_alat }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ $tool->category->nama_kategori }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                            <div>{{ $tool->stok }} <span class="text-xs text-green-500 dark:text-green-400">(Bagus)</span></div>
-                            @if($tool->stok_rusak > 0)
-                                <div>{{ $tool->stok_rusak }} <span class="text-xs text-red-400">(Rusak)</span></div>
-                            @endif
-                            @if($tool->stok_perbaikan > 0)
-                                <div>{{ $tool->stok_perbaikan }} <span class="text-xs text-yellow-400">(Perbaikan)</span></div>
-                            @endif
+                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-lg bg-gray-100 dark:bg-background-dark border border-gray-200 dark:border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-primary/50 transition-colors">
+                                    @if($tool->gambar)
+                                        <img src="{{ asset($tool->gambar) }}" class="w-full h-full object-cover">
+                                    @else
+                                        <span class="material-symbols-outlined text-gray-400 dark:text-gray-600 text-[24px]">construction</span>
+                                    @endif
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ $tool->nama_alat }}</div>
+                                    <div class="text-[10px] text-gray-500 font-mono uppercase mt-0.5">ID: TOOL-{{ str_pad($tool->id, 4, '0', STR_PAD_LEFT) }}</div>
+                                </div>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full
-                                @if($tool->status == 'tersedia') bg-green-500/20 text-green-400
-                                @elseif($tool->status == 'rusak') bg-red-500/20 text-red-400
-                                @elseif($tool->status == 'dipinjam') bg-blue-500/20 text-blue-400
-                                @else bg-yellow-500/20 text-yellow-400
-                                @endif">
-                                {{ ucfirst($tool->status ?? 'tersedia') }}
-                            </span>
+                        <td class="px-6 py-4">
+                            <x-badge type="primary" size="sm" class="font-normal">{{ $tool->category->nama_kategori }}</x-badge>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                            <a href="{{ route('admin.tools.show', $tool) }}" class="text-blue-400 hover:text-blue-300 inline-flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                Detail
-                            </a>
-                            <a href="{{ route('admin.tools.edit', $tool) }}" class="text-primary hover:text-primary/80 inline-flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[18px]">edit</span>
-                                Edit
-                            </a>
-                            <form method="POST" action="{{ route('admin.tools.destroy', $tool) }}" class="inline delete-form" data-id="{{ $tool->id }}" data-name="{{ $tool->nama_alat }}">
-                                @csrf
-                                @method('DELETE')
-                                <button type="button" onclick="handleDeleteTool(this)" class="text-red-400 hover:text-red-300 inline-flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                                    Hapus
-                                </button>
-                            </form>
+                        <td class="px-6 py-4">
+                            <div class="space-y-1 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-accent-green"></span>
+                                    <span class="text-gray-600 dark:text-gray-300 font-bold">{{ $tool->stok }}<span class="text-[10px] font-normal ml-1">Bagus</span></span>
+                                </div>
+                                @if($tool->stok_rusak > 0)
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                        <span class="text-gray-600 dark:text-gray-300">{{ $tool->stok_rusak }}<span class="text-[10px] ml-1">Rusak</span></span>
+                                    </div>
+                                @endif
+                                @if($tool->stok_perbaikan > 0)
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                                        <span class="text-gray-600 dark:text-gray-300">{{ $tool->stok_perbaikan }}<span class="text-[10px] ml-1">Bengkel</span></span>
+                                    </div>
+                                @endif
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <x-badge :type="match($tool->status) {
+                                'tersedia' => 'success',
+                                'rusak' => 'danger',
+                                'dipinjam' => 'info',
+                                default => 'warning'
+                            }" size="md">{{ ucfirst($tool->status ?? 'tersedia') }}</x-badge>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-2">
+                                <x-tooltip text="Lihat Detail">
+                                    <x-button variant="ghost" size="sm" :href="route('admin.tools.show', $tool)" icon="visibility" />
+                                </x-tooltip>
+                                <x-tooltip text="Edit Data">
+                                    <x-button variant="ghost" size="sm" :href="route('admin.tools.edit', $tool)" class="text-primary" icon="edit" />
+                                </x-tooltip>
+                                <form method="POST" action="{{ route('admin.tools.destroy', $tool) }}" class="inline delete-form" data-id="{{ $tool->id }}" data-name="{{ $tool->nama_alat }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <x-tooltip text="Hapus Alat">
+                                        <x-button variant="ghost" size="sm" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10" icon="delete" onclick="handleDeleteTool(this)" />
+                                    </x-tooltip>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-4">
-                            <div class="text-center py-12">
-                                <svg class="w-16 h-16 mx-auto text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                                </svg>
-                                <p class="text-gray-400 text-lg font-medium">Tidak ada data</p>
-                            </div>
+                        <td colspan="5">
+                            <x-empty-state 
+                                icon="inventory_2"
+                                title="Data Alat Kosong"
+                                description="Belum ada alat yang terdaftar atau filter tidak sesuai."
+                                :actionUrl="route('admin.tools.create')"
+                                actionText="Tambah Alat Baru"
+                            />
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-        {{ $tools->links('vendor.pagination.industrial') }}
-    </div>
-</div>
+    @if($tools->hasPages())
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-panel-dark">
+            {{ $tools->links('vendor.pagination.industrial') }}
+        </div>
+    @endif
+</x-card>
 
 
 <!-- Import Modal -->

@@ -12,61 +12,65 @@
 
 <!-- Stats Cards Row -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <!-- Active Borrowings Card -->
-    <div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl p-6 industrial-border relative group overflow-hidden">
-        <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span class="material-symbols-outlined text-[64px] text-blue-500">pending_actions</span>
-        </div>
-        <div class="relative z-10">
-            <p class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mb-1">Peminjaman Aktif</p>
-            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ $stats['active_borrowings'] }}</h3>
-            <div class="h-1 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                <div class="h-full bg-blue-500 w-1/2"></div>
+    <x-card class="industrial-border overflow-hidden" :padding="false">
+        <div class="p-6 flex items-center gap-4">
+            <div class="p-4 bg-blue-500/10 rounded-2xl">
+                <span class="material-symbols-outlined text-blue-500 text-[32px]">pending_actions</span>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Aktif</p>
+                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $stats['active_borrowings'] }}</h3>
             </div>
         </div>
-    </div>
+        <div class="h-1 w-full bg-gray-100 dark:bg-white/5">
+            <div class="h-full bg-blue-500 w-1/2"></div>
+        </div>
+    </x-card>
 
-    <!-- Pending Approvals Card -->
-    <div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl p-6 industrial-border relative group overflow-hidden">
-        <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span class="material-symbols-outlined text-[64px] text-yellow-500">assignment_late</span>
-        </div>
-        <div class="relative z-10">
-            <p class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mb-1">Menunggu</p>
-            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ $stats['pending_borrowings'] }}</h3>
-            <div class="h-1 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                <div class="h-full bg-yellow-500 w-1/3"></div>
+    <x-card class="industrial-border overflow-hidden" :padding="false">
+        <div class="p-6 flex items-center gap-4">
+            <div class="p-4 bg-yellow-500/10 rounded-2xl">
+                <span class="material-symbols-outlined text-yellow-500 text-[32px]">assignment_late</span>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Menunggu</p>
+                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $stats['pending_borrowings'] }}</h3>
             </div>
         </div>
-    </div>
+        <div class="h-1 w-full bg-gray-100 dark:bg-white/5">
+            <div class="h-full bg-yellow-500 w-1/3"></div>
+        </div>
+    </x-card>
 
-    <!-- Overdue Borrowings Card -->
-    <div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl p-6 industrial-border relative group overflow-hidden">
-        <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span class="material-symbols-outlined text-[64px] text-red-500">warning</span>
-        </div>
-        <div class="relative z-10">
-            <p class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mb-1">Terlambat</p>
-            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ $stats['overdue_borrowings'] }}</h3>
-            <div class="h-1 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                <div class="h-full bg-red-500 w-full"></div>
+    <x-card class="industrial-border overflow-hidden" :padding="false">
+        <div class="p-6 flex items-center gap-4">
+            <div class="p-4 bg-red-500/10 rounded-2xl">
+                <span class="material-symbols-outlined text-red-500 text-[32px]">warning</span>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Terlambat</p>
+                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $stats['overdue_borrowings'] }}</h3>
             </div>
         </div>
-    </div>
+        <div class="h-1 w-full bg-gray-100 dark:bg-white/5">
+            <div class="h-full bg-red-500 w-full"></div>
+        </div>
+    </x-card>
 
-    <!-- Tools Borrowed Today Card -->
-    <div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl p-6 industrial-border relative group overflow-hidden">
-        <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-            <span class="material-symbols-outlined text-[64px] text-green-500">today</span>
-        </div>
-        <div class="relative z-10">
-            <p class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mb-1">Dipinjam Hari Ini</p>
-            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ $stats['borrowed_today'] ?? 0 }}</h3>
-            <div class="h-1 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                <div class="h-full bg-green-500 w-3/4"></div>
+    <x-card class="industrial-border overflow-hidden" :padding="false">
+        <div class="p-6 flex items-center gap-4">
+            <div class="p-4 bg-green-500/10 rounded-2xl">
+                <span class="material-symbols-outlined text-green-500 text-[32px]">today</span>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Hari Ini</p>
+                <h3 class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ $stats['borrowed_today'] ?? 0 }}</h3>
             </div>
         </div>
-    </div>
+        <div class="h-1 w-full bg-gray-100 dark:bg-white/5">
+            <div class="h-full bg-green-500 w-3/4"></div>
+        </div>
+    </x-card>
 </div>
 
 <!-- Tables Row -->

@@ -102,27 +102,139 @@
     .subtext {
         @apply text-sm text-gray-400;
     }
+    
+    /* Sticky Table Header */
+    .sticky-header {
+        @apply sticky top-0 z-10 bg-gray-50 dark:bg-gray-800;
+    }
 }
 
 @layer utilities {
     .glass {
         @apply bg-gray-800/80 backdrop-blur-md border border-gray-700/50;
     }
-    /* Skeleton loading */
+    
+    /* ===== LOADING STATES ===== */
     .skeleton {
-        @apply animate-pulse bg-gray-700 rounded;
+        @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
     }
-    /* Smooth fade */
+    
+    /* ===== ANIMATIONS ===== */
+    /* Fade In */
     .fade-in {
-        animation: fadeIn 0.3s ease-in;
+        animation: fadeIn 0.4s ease-out;
     }
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from { 
+            opacity: 0; 
+            transform: translateY(-10px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
     }
-    /* Pulse animation for important badges */
+    
+    /* Slide In from Right */
+    .slide-in-right {
+        animation: slideInRight 0.3s ease-out;
+    }
+    @keyframes slideInRight {
+        from { 
+            opacity: 0; 
+            transform: translateX(20px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+    }
+    
+    /* Slide In from Left */
+    .slide-in-left {
+        animation: slideInLeft 0.3s ease-out;
+    }
+    @keyframes slideInLeft {
+        from { 
+            opacity: 0; 
+            transform: translateX(-20px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateX(0); 
+        }
+    }
+    
+    /* Scale In */
+    .scale-in {
+        animation: scaleIn 0.3s ease-out;
+    }
+    @keyframes scaleIn {
+        from { 
+            opacity: 0; 
+            transform: scale(0.9); 
+        }
+        to { 
+            opacity: 1; 
+            transform: scale(1); 
+        }
+    }
+    
+    /* Pulse Badge */
     .pulse-badge {
         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
+    
+    /* Shake (for errors) */
+    .shake {
+        animation: shake 0.5s ease-in-out;
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    /* ===== HOVER EFFECTS ===== */
+    .hover-lift {
+        @apply transition-all duration-200;
+    }
+    .hover-lift:hover {
+        @apply -translate-y-1 shadow-lg;
+    }
+    
+    .hover-glow {
+        @apply transition-all duration-300;
+    }
+    .hover-glow:hover {
+        @apply shadow-lg shadow-primary/20;
+    }
+    
+    /* ===== TRANSITIONS ===== */
+    .transition-smooth {
+        @apply transition-all duration-300 ease-in-out;
+    }
+    
+    .transition-fast {
+        @apply transition-all duration-150 ease-in-out;
+    }
+    
+    /* ===== INDUSTRIAL BORDER ENHANCEMENT ===== */
+    .industrial-border {
+        position: relative;
+    }
+    .industrial-border::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(13, 88, 104, 0.5), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .industrial-border:hover::before {
+        opacity: 1;
+    }
 }
-

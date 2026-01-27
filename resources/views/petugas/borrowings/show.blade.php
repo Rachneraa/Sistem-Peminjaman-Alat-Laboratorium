@@ -131,9 +131,9 @@
                 Aksi Peminjaman
             </h2>
             <div class="flex gap-4">
-                <form method="POST" action="{{ route('petugas.borrowings.approve', $borrowing) }}">
+                <form id="approveForm" method="POST" action="{{ route('petugas.borrowings.approve', $borrowing) }}">
                     @csrf
-                    <button type="submit" class="h-12 px-6 bg-green-600 text-white hover:bg-green-500 rounded-lg font-bold uppercase tracking-wider transition-all inline-flex items-center gap-2 shadow-lg shadow-green-600/20" onclick="return confirm('Setujui peminjaman ini?')">
+                    <button type="button" class="h-12 px-6 bg-green-600 text-white hover:bg-green-500 rounded-lg font-bold uppercase tracking-wider transition-all inline-flex items-center gap-2 shadow-lg shadow-green-600/20" onclick="handleApproveSingle()">
                         <span class="material-symbols-outlined text-[20px]">check_circle</span>
                         Setujui Peminjaman
                     </button>
@@ -214,7 +214,7 @@
     @endif
 
     <div class="flex gap-4">
-        <a href="{{ route('petugas.borrowings.index') }}" class="h-10 px-6 flex items-center bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-all uppercase tracking-wide text-xs">
+        <a href="{{ request('from') === 'returns' ? route('petugas.returns.index') : route('petugas.borrowings.index') }}" class="h-10 px-6 flex items-center bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-all uppercase tracking-wide text-xs">
             <span class="material-symbols-outlined text-[18px] mr-2">arrow_back</span>
             Kembali
         </a>
@@ -295,6 +295,18 @@
 </div>
 
 <script>
+function handleApproveSingle() {
+    showConfirmModal({
+        title: 'Setujui Peminjaman',
+        message: 'Yakin ingin menyetujui peminjaman ini? Stok alat akan berkurang otomatis.',
+        type: 'success',
+        okText: 'Ya, Setujui',
+        onConfirm: function() {
+            document.getElementById('approveForm').submit();
+        }
+    });
+}
+
 function showRejectModal() {
     document.getElementById('rejectModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';

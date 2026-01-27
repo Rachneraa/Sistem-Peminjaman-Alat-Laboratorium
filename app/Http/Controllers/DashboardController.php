@@ -146,6 +146,21 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
+        // Category Distribution
+        $categories_dist = Category::withCount('tools')->get();
+
+        // Monthly Fines Distribution (Current Year)
+        $fines_chart = ReturnModel::selectRaw('MONTH(created_at) as month, SUM(denda + COALESCE(denda_kerusakan, 0)) as total')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('month')
+            ->pluck('total', 'month')
+            ->toArray();
+            
+        $fines_data = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $fines_data[] = $fines_chart[$i] ?? 0;
+        }
+
         return view('admin.dashboard', compact(
             'stats', 
             'recent_borrowings', 
@@ -155,6 +170,8 @@ class DashboardController extends Controller
             'active_data', 
             'overdue_data', 
             'popular_tools',
+            'categories_dist',
+            'fines_data',
             'period'
         ));
     }
@@ -248,7 +265,19 @@ class DashboardController extends Controller
 
         $notifications = $user->notifications()->unread()->latest()->limit(5)->get();
 
-        return view('peminjam.dashboard', compact('stats', 'my_borrowings', 'available_tools', 'notifications', 'nearest_due'));
+        // Trend Peminjaman (6 bulan terakhir)
+        $trend_labels = [];
+        $trend_data = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $trend_labels[] = $month->format('M');
+            $trend_data[] = Borrowing::where('user_id', $user->id)
+                ->whereMonth('tanggal_pinjam', $month->month)
+                ->whereYear('tanggal_pinjam', $month->year)
+                ->count();
+        }
+
+        return view('peminjam.dashboard', compact('stats', 'my_borrowings', 'available_tools', 'notifications', 'nearest_due', 'trend_labels', 'trend_data'));
     }
 }
 

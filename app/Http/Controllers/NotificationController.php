@@ -9,6 +9,27 @@ use Illuminate\Support\Facades\Auth;
 class NotificationController extends Controller
 {
     /**
+     * Menampilkan semua riwayat notifikasi
+     */
+    public function index(Request $request)
+    {
+        $query = Auth::user()->notifications();
+
+        // Optional: Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                  ->orWhere('pesan', 'like', "%{$search}%");
+            });
+        }
+
+        $notifications = $query->latest()->paginate(20)->withQueryString();
+
+        return view('notifications.index', compact('notifications'));
+    }
+
+    /**
      * Tandai notifikasi sebagai dibaca
      */
     public function markAsRead(Notification $notification)

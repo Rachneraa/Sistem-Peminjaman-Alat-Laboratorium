@@ -10,133 +10,132 @@
     </div>
 </div>
 
-<!-- Filter -->
-<!-- Filter -->
-<div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl p-6 mb-6 industrial-border">
-    <form method="GET" action="{{ route('petugas.returns.index') }}" class="flex flex-wrap gap-4">
-        <div class="flex-1 min-w-[200px]">
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Filter</label>
-            <select name="filter" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
-                <option value="">Semua (Aktif & Menunggu)</option>
-                <option value="terlambat" {{ request('filter') == 'terlambat' ? 'selected' : '' }}>Terlambat</option>
-            </select>
-        </div>
-        <div class="flex items-end gap-2 pb-[1px]">
-            <button type="submit" class="h-[42px] px-6 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
-                <span class="material-symbols-outlined text-[18px]">filter_list</span>
-                Filter
-            </button>
-            <a href="{{ route('petugas.returns.index') }}" class="h-[42px] px-4 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all font-medium">
-                <span class="material-symbols-outlined text-[20px] mr-1">refresh</span>
-                Reset
-            </a>
-        </div>
-    </form>
-</div>
+@php
+    $activeFiltersCount = collect(request()->only(['filter']))->filter()->count();
+@endphp
 
-<!-- Table Pengembalian Menunggu Persetujuan -->
-<div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl overflow-hidden industrial-border">
+<x-filter-panel :action="route('petugas.returns.index')" :activeFiltersCount="$activeFiltersCount">
+    <div class="md:col-span-4">
+        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Filter Keterlambatan</label>
+        <select name="filter" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
+            <option value="">Semua (Aktif & Menunggu)</option>
+            <option value="terlambat" {{ request('filter') == 'terlambat' ? 'selected' : '' }}>Hanya Peminjaman Terlambat</option>
+        </select>
+    </div>
+</x-filter-panel>
+
+<x-card class="overflow-hidden" :padding="false">
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-800">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-white/5">
+            <thead class="bg-gray-50 dark:bg-panel-dark sticky top-0 z-10 border-b border-gray-200 dark:border-white/5">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Peminjam</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal Mulai</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal Selesai</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Alat</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estimasi Denda</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Peminjam</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Periode Pinjam</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Daftar Alat</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Estimasi Denda</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Status</th>
+                    <th class="px-6 py-4 text-right text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody class="divide-y divide-gray-200 dark:divide-white/5">
                 @forelse($borrowings as $borrowing)
                     @php
                         $tanggalSelesai = $borrowing->tanggal_selesai ?? $borrowing->jatuh_tempo;
                         $isOverdue = $tanggalSelesai && now()->startOfDay()->gt(\Carbon\Carbon::parse($tanggalSelesai)->startOfDay());
                         $estimatedFine = $borrowing->calculateEstimatedFine();
                     @endphp
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition {{ $isOverdue ? 'bg-red-50 dark:bg-red-900/10' : '' }}" data-borrowing-id="{{ $borrowing->id }}">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-primary">#{{ $borrowing->id }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                            <div class="font-bold">{{ $borrowing->user->name }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $borrowing->user->email }}</div>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group {{ $isOverdue ? 'bg-red-500/[0.03]' : '' }}" data-borrowing-id="{{ $borrowing->id }}">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                    <span class="material-symbols-outlined text-primary text-[18px]">person</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ $borrowing->user->name }}</div>
+                                    <div class="text-[10px] text-gray-500 font-mono uppercase mt-0.5">ID: #{{ $borrowing->id }}</div>
+                                </div>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ $borrowing->tanggal_pinjam->format('d/m/Y') }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                            {{ $borrowing->tanggal_selesai ? $borrowing->tanggal_selesai->format('d/m/Y') : ($borrowing->jatuh_tempo ? $borrowing->jatuh_tempo->format('d/m/Y') : '-') }}
-                            @if($isOverdue)
-                                <span class="block text-xs text-red-400 font-bold uppercase tracking-wider mt-1">Terlambat!</span>
-                            @endif
+                        <td class="px-6 py-4">
+                            <div class="text-xs space-y-1">
+                                <div class="text-gray-600 dark:text-gray-300 flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[14px] text-gray-400">calendar_today</span>
+                                    {{ $borrowing->tanggal_pinjam->format('d/m/Y') }}
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="text-gray-400 flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-[14px]">event_busy</span>
+                                        {{ $borrowing->tanggal_selesai ? $borrowing->tanggal_selesai->format('d/m/Y') : ($borrowing->jatuh_tempo ? $borrowing->jatuh_tempo->format('d/m/Y') : '-') }}
+                                    </div>
+                                    @if($isOverdue)
+                                        <x-badge type="danger" size="xs">OVERDUE</x-badge>
+                                    @endif
+                                </div>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                            <ul class="text-gray-600 dark:text-gray-300 space-y-1">
-                                @foreach($borrowing->borrowingDetails as $detail)
-                                    <li class="flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
-                                        {{ $detail->tool->nama_alat }} <span class="text-gray-500 dark:text-gray-400">({{ $detail->jumlah }})</span>
-                                    </li>
+                        <td class="px-6 py-4">
+                            <div class="space-y-1">
+                                @foreach($borrowing->borrowingDetails->take(2) as $detail)
+                                    <div class="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                                        <span class="w-1 h-1 rounded-full bg-primary"></span>
+                                        {{ $detail->tool->nama_alat }} ({{ $detail->jumlah }})
+                                    </div>
                                 @endforeach
-                            </ul>
+                                @if($borrowing->borrowingDetails->count() > 2)
+                                    <div class="text-[10px] text-gray-400 italic pl-3">+ {{ $borrowing->borrowingDetails->count() - 2 }} lainnya</div>
+                                @endif
+                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <td class="px-6 py-4">
                             @if($estimatedFine['denda'] > 0)
-                                <div class="text-red-400 font-bold">Rp {{ number_format($estimatedFine['denda'], 0, ',', '.') }}</div>
-                                <div class="text-xs text-red-400/70 font-medium">{{ $estimatedFine['terlambat_hari'] }} hari terlambat</div>
+                                <div class="text-xs font-bold text-red-500">Rp{{ number_format($estimatedFine['denda'], 0, ',', '.') }}</div>
+                                <div class="text-[10px] text-red-400">{{ $estimatedFine['terlambat_hari'] }} Hari</div>
                             @else
-                                <span class="text-green-400 font-bold">Rp 0</span>
-                                <div class="text-xs text-gray-500">Tidak ada denda</div>
+                                <span class="text-xs text-accent-green">Rp0</span>
                             @endif
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-3 py-1 text-xs font-bold rounded uppercase tracking-wider border bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
-                                Menunggu Pengembalian
-                            </span>
+                        <td class="px-6 py-4">
+                            <x-badge type="warning" size="sm">WAITING RETURN</x-badge>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex flex-col gap-2">
-                                <a href="{{ route('petugas.borrowings.show', $borrowing) }}" class="text-blue-400 hover:text-blue-300 text-left inline-flex items-center gap-1 transition-colors">
-                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                    Detail
-                                </a>
-                                @if($estimatedFine['denda'] > 0)
-                                    <form method="POST" action="{{ route('petugas.borrowings.fine-notification', $borrowing) }}" class="inline">
-                                        @csrf
-                                        <button type="submit" class="text-orange-400 hover:text-orange-300 text-left inline-flex items-center gap-1 transition-colors">
-                                            <span class="material-symbols-outlined text-[18px]">notifications_active</span>
-                                            Kirim Notif Denda
-                                        </button>
-                                    </form>
-                                @endif
-                                <button onclick="showReminderModal({{ $borrowing->id }}, '{{ route('petugas.borrowings.reminder', $borrowing) }}')" class="text-yellow-400 hover:text-yellow-300 text-left inline-flex items-center gap-1 transition-colors">
-                                    <span class="material-symbols-outlined text-[18px]">alarm</span>
-                                    Kirim Pengingat
-                                </button>
-                                <button onclick="showReturnModal({{ $borrowing->id }}, '{{ route('petugas.borrowings.return', $borrowing) }}')" class="text-green-400 hover:text-green-300 text-left inline-flex items-center gap-1 transition-colors">
-                                    <span class="material-symbols-outlined text-[18px]">assignment_return</span>
-                                    Setujui Pengembalian
-                                </button>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex flex-col items-end gap-1">
+                                <x-button variant="ghost" size="sm" :href="route('petugas.borrowings.show', [$borrowing, 'from' => 'returns'])" icon="visibility" class="text-blue-500">Detail</x-button>
+                                <div class="flex gap-1 mt-1">
+                                    <x-button variant="ghost" size="sm" type="button" class="text-yellow-500" icon="notifications" onclick="showReminderModal({{ $borrowing->id }}, '{{ route('petugas.borrowings.reminder', $borrowing) }}')" />
+                                    @if($estimatedFine['denda'] > 0)
+                                        <form method="POST" action="{{ route('petugas.borrowings.fine-notification', $borrowing) }}" class="inline">
+                                            @csrf
+                                            <x-button variant="ghost" size="sm" type="submit" class="text-orange-500" icon="payments" />
+                                        </form>
+                                    @endif
+                                    <x-button variant="success" size="sm" type="button" class="font-bold flex items-center gap-1" onclick="showReturnModal({{ $borrowing->id }}, '{{ route('petugas.borrowings.return', $borrowing) }}')">
+                                        <span class="material-symbols-outlined text-[18px]">assignment_return</span>
+                                        Setujui
+                                    </x-button>
+                                </div>
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-12">
-                            <div class="flex flex-col items-center justify-center text-center">
-                                <span class="material-symbols-outlined text-gray-600 text-[64px] mb-4">assignment_turned_in</span>
-                                <p class="text-gray-400 text-lg font-medium">Tidak ada peminjaman aktif</p>
-                            </div>
+                        <td colspan="6">
+                            <x-empty-state 
+                                icon="assignment_return"
+                                title="Tidak Ada Pengembalian"
+                                description="Belum ada pendaftaran pengembalian atau filter tidak sesuai."
+                            />
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-        {{ $borrowings->links('vendor.pagination.industrial') }}
-    </div>
-</div>
+    @if($borrowings->hasPages())
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-panel-dark">
+            {{ $borrowings->links('vendor.pagination.industrial') }}
+        </div>
+    @endif
+</x-card>
 
 <!-- Modal Pengingat -->
 <div id="reminderModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
@@ -240,7 +239,7 @@ function showReturnModal(borrowingId, actionUrl) {
     // Ambil data alat dari tabel
     const row = document.querySelector(`tr[data-borrowing-id="${borrowingId}"]`);
     if (row) {
-        const toolsCell = row.querySelector('td:nth-child(5)'); // Kolom Alat
+        const toolsCell = row.querySelector('td:nth-child(3)'); // Kolom Daftar Alat (Index 3)
         const toolsList = document.getElementById('returnToolsList');
         if (toolsCell && toolsList) {
             toolsList.innerHTML = toolsCell.innerHTML.replace(/<ul[^>]*>|<\/ul>/g, '').replace(/<li[^>]*>/g, '<div class="py-1 border-b border-gray-700/50 last:border-0 flex items-center gap-2">').replace(/<\/li>/g, '</div>').replace(/<span class="w-1.5 h-1.5 rounded-full bg-gray-500"><\/span>/g, '<span class="material-symbols-outlined text-[16px] text-gray-500">construction</span>');

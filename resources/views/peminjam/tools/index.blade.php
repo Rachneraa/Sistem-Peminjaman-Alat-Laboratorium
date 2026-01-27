@@ -10,34 +10,33 @@
     </div>
 </div>
 
-<!-- Filter -->
-<div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl p-6 mb-6 industrial-border">
-    <form method="GET" action="{{ route('peminjam.tools.index') }}" class="flex flex-wrap gap-4">
-        <div class="flex-1 min-w-[200px]">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari alat..." class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 placeholder-gray-500 transition-all">
+@php
+    $activeFiltersCount = collect(request()->only(['search', 'kategori_id']))->filter()->count();
+@endphp
+
+<x-filter-panel :action="route('peminjam.tools.index')" :activeFiltersCount="$activeFiltersCount">
+    <div class="md:col-span-2">
+        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Cari Alat</label>
+        <div class="relative group">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama alat..." class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 pl-10 transition-all">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 dark:text-gray-500">
+                <span class="material-symbols-outlined text-[20px]">search</span>
+            </div>
         </div>
-        <div class="flex-1 min-w-[200px]">
-            <select name="kategori_id" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
-                <option value="">Semua Kategori</option>
-                @foreach($categories as $category)
-                    <option value="{{ $category->id }}" {{ request('kategori_id') == $category->id ? 'selected' : '' }}>
-                        {{ $category->nama_kategori }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="flex items-end gap-2 pb-[1px]">
-            <button type="submit" class="h-[42px] px-6 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
-                <span class="material-symbols-outlined text-[18px]">search</span>
-                Cari
-            </button>
-            <a href="{{ route('peminjam.tools.index') }}" class="h-[42px] px-4 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all font-medium">
-                <span class="material-symbols-outlined text-[20px] mr-1">refresh</span>
-                Reset
-            </a>
-        </div>
-    </form>
-</div>
+    </div>
+
+    <div class="md:col-span-2">
+        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Kategori</label>
+        <select name="kategori_id" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
+            <option value="">Semua Kategori</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}" {{ request('kategori_id') == $category->id ? 'selected' : '' }}>
+                    {{ $category->nama_kategori }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+</x-filter-panel>
 
 <!-- Grid Alat -->
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

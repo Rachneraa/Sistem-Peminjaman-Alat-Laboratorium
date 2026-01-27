@@ -14,113 +14,125 @@
     </a>
 </div>
 
-<div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl overflow-hidden industrial-border">
+@php
+    $activeFiltersCount = collect(request()->only(['status']))->filter()->count();
+@endphp
+
+<x-filter-panel :action="route('peminjam.borrowings.index')" :activeFiltersCount="$activeFiltersCount">
+    <div class="md:col-span-4">
+        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Filter Status Peminjaman</label>
+        <select name="status" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
+            <option value="">Semua Status</option>
+            <option value="menunggu" {{ request('status') == 'menunggu' ? 'selected' : '' }}>Menunggu Persetujuan</option>
+            <option value="disetujui" {{ request('status') == 'disetujui' ? 'selected' : '' }}>Sedang Dipinjam</option>
+            <option value="dikembalikan" {{ request('status') == 'dikembalikan' ? 'selected' : '' }}>Sudah Dikembalikan</option>
+            <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+        </select>
+    </div>
+</x-filter-panel>
+
+<x-card class="overflow-hidden" :padding="false">
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-800">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-white/5">
+            <thead class="bg-gray-50 dark:bg-panel-dark sticky top-0 z-10 border-b border-gray-200 dark:border-white/5">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal Pinjam</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Alat</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estimasi Denda</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">ID / Waktu Pinjam</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Daftar Alat</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Estimasi Denda</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Status</th>
+                    <th class="px-6 py-4 text-right text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Aksi</th>
                 </tr>
             </thead>
-        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            @forelse($borrowings as $borrowing)
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-primary">#{{ $borrowing->id }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                        <div>{{ $borrowing->tanggal_pinjam->format('d/m/Y') }}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">Selesai: {{ $borrowing->tanggal_selesai ? $borrowing->tanggal_selesai->format('d/m/Y') : '-' }}</div>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                        <ul class="text-gray-600 dark:text-gray-300 space-y-1">
-                            @foreach($borrowing->borrowingDetails as $detail)
-                                <li class="flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500"></span>
-                                    {{ $detail->tool->nama_alat }} <span class="text-gray-500 dark:text-gray-500">({{ $detail->jumlah }})</span>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        @php
-                            $showFine = in_array($borrowing->status, ['disetujui', 'menunggu_pengembalian']);
-                            $estimatedFine = $showFine ? $borrowing->calculateEstimatedFine() : ['denda' => 0, 'terlambat_hari' => 0];
-                        @endphp
-                        @if($showFine)
-                            @if($estimatedFine['denda'] > 0)
-                                <div class="text-red-500 dark:text-red-400 font-semibold">Rp {{ number_format($estimatedFine['denda'], 0, ',', '.') }}</div>
-                                <div class="text-xs text-red-400 dark:text-red-300">{{ $estimatedFine['terlambat_hari'] }} hari terlambat</div>
+            <tbody class="divide-y divide-gray-200 dark:divide-white/5">
+                @forelse($borrowings as $borrowing)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                    <span class="material-symbols-outlined text-primary text-[18px]">receipt_long</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-[10px] text-gray-500 font-mono uppercase">#{{ $borrowing->id }}</div>
+                                    <div class="text-sm font-bold text-gray-900 dark:text-white">{{ $borrowing->tanggal_pinjam->format('d/m/Y') }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="space-y-1">
+                                @foreach($borrowing->borrowingDetails->take(2) as $detail)
+                                    <div class="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                                        <span class="w-1 h-1 rounded-full bg-primary"></span>
+                                        {{ $detail->tool->nama_alat }} ({{ $detail->jumlah }})
+                                    </div>
+                                @endforeach
+                                @if($borrowing->borrowingDetails->count() > 2)
+                                    <div class="text-[10px] text-gray-400 italic pl-3">+ {{ $borrowing->borrowingDetails->count() - 2 }} lainnya</div>
+                                @endif
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm font-medium">
+                            @php
+                                $showFine = in_array($borrowing->status, ['disetujui', 'menunggu_pengembalian']);
+                                $estimatedFine = $showFine ? $borrowing->calculateEstimatedFine() : ['denda' => 0, 'terlambat_hari' => 0];
+                            @endphp
+                            
+                            @if($showFine)
+                                @if($estimatedFine['denda'] > 0)
+                                    <div class="text-red-500 font-bold text-xs">Rp{{ number_format($estimatedFine['denda'], 0, ',', '.') }}</div>
+                                    <div class="text-[10px] text-red-400">{{ $estimatedFine['terlambat_hari'] }} Hari Terlambat</div>
+                                @else
+                                    <span class="text-accent-green text-xs">Rp0</span>
+                                @endif
+                            @elseif($borrowing->status == 'dikembalikan' && $borrowing->return)
+                                <div class="text-red-500 font-bold text-xs">Rp{{ number_format($borrowing->return->denda + ($borrowing->return->denda_kerusakan ?? 0), 0, ',', '.') }}</div>
                             @else
-                                <span class="text-green-500 dark:text-green-400">Rp 0</span>
+                                <span class="text-gray-400 text-xs">-</span>
                             @endif
-                        @elseif($borrowing->status == 'dikembalikan' && $borrowing->return)
-                            <div class="text-red-500 dark:text-red-400 font-semibold">Rp {{ number_format($borrowing->return->denda, 0, ',', '.') }}</div>
-                            @if($borrowing->return->terlambat_hari > 0)
-                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $borrowing->return->terlambat_hari }} hari terlambat</div>
-                            @endif
-                        @else
-                            <span class="text-gray-400 dark:text-gray-500">-</span>
-                        @endif
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1 text-xs font-bold rounded uppercase tracking-wider border
-                            @if($borrowing->status == 'disetujui') bg-green-500/10 text-green-500 dark:text-green-400 border-green-500/20
-                            @elseif($borrowing->status == 'menunggu_pengembalian') bg-yellow-500/10 text-yellow-500 dark:text-yellow-400 border-yellow-500/20
-                            @elseif($borrowing->status == 'ditolak') bg-red-500/10 text-red-500 dark:text-red-400 border-red-500/20
-                            @elseif($borrowing->status == 'dikembalikan') bg-blue-500/10 text-blue-500 dark:text-blue-400 border-blue-500/20
-                            @else bg-yellow-500/10 text-yellow-500 dark:text-yellow-400 border-yellow-500/20
-                            @endif">
-                            @if($borrowing->status == 'menunggu_pengembalian')
-                                Menunggu
-                            @else
-                                {{ ucfirst(str_replace('_', ' ', $borrowing->status)) }}
-                            @endif
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex flex-col gap-2">
-                            <a href="{{ route('peminjam.borrowings.show', $borrowing) }}" class="text-primary hover:text-primary/80 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center gap-1 transition-colors">
-                                <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                Detail
-                            </a>
-                            @if($borrowing->status == 'disetujui')
-                                <form method="POST" action="{{ route('peminjam.borrowings.return', $borrowing) }}" class="inline return-form" data-id="{{ $borrowing->id }}">
-                                    @csrf
-                                    <button type="button" onclick="handleReturnBorrowing(this)" class="text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300 inline-flex items-center gap-1 transition-colors">
-                                        <span class="material-symbols-outlined text-[18px]">assignment_return</span>
-                                        Kembalikan
-                                    </button>
-                                </form>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="px-6 py-12">
-                        <div class="flex flex-col items-center justify-center text-center">
-                            <span class="material-symbols-outlined text-gray-400 dark:text-gray-600 text-[64px] mb-4">inbox</span>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg font-medium mb-2">Belum ada peminjaman</p>
-                            <p class="text-gray-500 dark:text-gray-500 text-sm mb-4">Mulai dengan mengajukan peminjaman pertama Anda</p>
-                            <a href="{{ route('peminjam.borrowings.create') }}" class="px-5 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all flex items-center justify-center gap-2 text-sm font-medium shadow-lg shadow-primary/20 w-fit mx-auto">
-                                <span class="material-symbols-outlined text-[20px]">add</span>
-                                Ajukan Peminjaman
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+                        </td>
+                        <td class="px-6 py-4">
+                            <x-badge :type="match($borrowing->status) {
+                                'disetujui' => 'primary',
+                                'dikembalikan' => 'success',
+                                'ditolak' => 'danger',
+                                default => 'warning'
+                            }" size="sm">
+                                {{ $borrowing->status == 'menunggu_pengembalian' ? 'PROSES KEMBALI' : strtoupper(str_replace('_', ' ', $borrowing->status)) }}
+                            </x-badge>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex justify-end gap-1">
+                                <x-button variant="ghost" size="sm" :href="route('peminjam.borrowings.show', $borrowing)" icon="visibility" />
+                                @if($borrowing->status == 'disetujui')
+                                    <form method="POST" action="{{ route('peminjam.borrowings.return', $borrowing) }}" class="inline return-form" data-id="{{ $borrowing->id }}">
+                                        @csrf
+                                        <x-button variant="ghost" size="sm" type="button" class="text-accent-green" icon="assignment_return" onclick="handleReturnBorrowing(this)" />
+                                    </form>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5">
+                            <x-empty-state 
+                                icon="receipt_long"
+                                title="Belum Ada Peminjaman"
+                                description="Anda belum pernah melakukan peminjaman alat."
+                                :actionUrl="route('peminjam.borrowings.create')"
+                                actionText="Pinjam Alat Sekarang"
+                            />
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
-    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-        {{ $borrowings->links('vendor.pagination.industrial') }}
-    </div>
-</div>
+    @if($borrowings->hasPages())
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-panel-dark">
+            {{ $borrowings->links('vendor.pagination.industrial') }}
+        </div>
+    @endif
+</x-card>
 
 <script>
 function handleReturnBorrowing(button) {
@@ -139,4 +151,3 @@ function handleReturnBorrowing(button) {
 }
 </script>
 @endsection
-

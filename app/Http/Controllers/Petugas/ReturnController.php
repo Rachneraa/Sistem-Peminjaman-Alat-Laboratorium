@@ -116,10 +116,6 @@ class ReturnController extends Controller
                 $message .= ' Total Denda: Rp ' . number_format($totalDenda, 0, ',', '.') . ' (' . implode(', ', $dendaDetails) . ')';
             }
             
-            if (count($dendaDetails) > 0) {
-                $message .= ' Total Denda: Rp ' . number_format($totalDenda, 0, ',', '.') . ' (' . implode(', ', $dendaDetails) . ')';
-            }
-            
             return redirect()->route('petugas.borrowings.show', $borrowing)
                 ->with('success', $message);
         } catch (\Exception $e) {

@@ -199,11 +199,11 @@
                                 <span class="material-symbols-outlined text-[20px]">dashboard</span>
                                 <span>Dashboard</span>
                             </a>
-                            <a href="{{ route('petugas.borrowings.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition {{ request()->routeIs('petugas.borrowings.*') && !request()->routeIs('petugas.borrowings.all') ? 'sidebar-link-active' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white' }}">
+                            <a href="{{ route('petugas.borrowings.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition {{ (request()->routeIs('petugas.borrowings.index') || (request()->routeIs('petugas.borrowings.show') && request('from') !== 'returns')) ? 'sidebar-link-active' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white' }}">
                                 <span class="material-symbols-outlined text-[20px]">check_circle</span>
                                 <span>Setujui Peminjaman</span>
                             </a>
-                            <a href="{{ route('petugas.returns.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition {{ request()->routeIs('petugas.returns.*') && !request()->routeIs('petugas.returns.all') ? 'sidebar-link-active' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white' }}">
+                            <a href="{{ route('petugas.returns.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded text-sm font-medium transition {{ (request()->routeIs('petugas.returns.index') || (request()->routeIs('petugas.borrowings.show') && request('from') === 'returns')) ? 'sidebar-link-active' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white' }}">
                                 <span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
                                 <span>Setujui Pengembalian</span>
                             </a>

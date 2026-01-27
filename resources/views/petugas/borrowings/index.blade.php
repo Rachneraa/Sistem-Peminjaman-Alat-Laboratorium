@@ -10,119 +10,136 @@
     </div>
 </div>
 
-<!-- Filter -->
-<!-- Filter -->
-<div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl p-6 mb-6 industrial-border">
-    <form method="GET" action="{{ route('petugas.borrowings.index') }}" class="flex flex-wrap gap-4">
-        <div class="flex-1 min-w-[200px]">
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Filter Status</label>
-            <select name="status" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
-                <option value="">Semua (Menunggu, Disetujui & Aktif)</option>
-                <option value="menunggu" {{ request('status') == 'menunggu' ? 'selected' : '' }}>Menunggu Persetujuan</option>
-                <option value="disetujui" {{ request('status') == 'disetujui' ? 'selected' : '' }}>Sudah Disetujui</option>
-            </select>
+@php
+    $activeFiltersCount = collect(request()->only(['search', 'status']))->filter()->count();
+@endphp
+
+<x-filter-panel :action="route('petugas.borrowings.index')" :activeFiltersCount="$activeFiltersCount">
+    <div class="md:col-span-2">
+        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Cari Peminjam</label>
+        <div class="relative group">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama atau email..." class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 pl-10 transition-all">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 dark:text-gray-500">
+                <span class="material-symbols-outlined text-[20px]">search</span>
+            </div>
         </div>
-        <div class="flex items-end gap-2 pb-[1px]">
-            <button type="submit" class="h-[42px] px-6 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
-                <span class="material-symbols-outlined text-[18px]">filter_list</span>
-                Filter
-            </button>
-            <a href="{{ route('petugas.borrowings.index') }}" class="h-[42px] px-4 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-all font-medium">
-                <span class="material-symbols-outlined text-[20px] mr-1">refresh</span>
-                Reset
-            </a>
-        </div>
-    </form>
-</div>
+    </div>
+
+    <div class="md:col-span-2">
+        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Status Peminjaman</label>
+        <select name="status" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
+            <option value="">Semua (Menunggu & Disetujui)</option>
+            <option value="menunggu" {{ request('status') == 'menunggu' ? 'selected' : '' }}>Menunggu Persetujuan</option>
+            <option value="disetujui" {{ request('status') == 'disetujui' ? 'selected' : '' }}>Sudah Disetujui</option>
+        </select>
+    </div>
+</x-filter-panel>
 
 <!-- Table Peminjaman -->
-<div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl overflow-hidden industrial-border">
+<x-card class="overflow-hidden" :padding="false">
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead class="bg-gray-50 dark:bg-gray-800">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-white/5">
+            <thead class="bg-gray-50 dark:bg-panel-dark sticky top-0 z-10 border-b border-gray-200 dark:border-white/5">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Peminjam</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal Mulai</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tanggal Selesai</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Alat</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aksi</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Peminjam</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Periode Pinjam</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Daftar Alat</th>
+                    <th class="px-6 py-4 text-left text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Status</th>
+                    <th class="px-6 py-4 text-right text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody class="divide-y divide-gray-200 dark:divide-white/5">
                 @forelse($borrowings as $borrowing)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-primary">#{{ $borrowing->id }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                            <div class="font-bold">{{ $borrowing->user->name }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $borrowing->user->email }}</div>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                    <span class="material-symbols-outlined text-primary text-[18px]">person</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ $borrowing->user->name }}</div>
+                                    <div class="text-[10px] text-gray-500 font-mono uppercase mt-0.5">ID: #{{ $borrowing->id }}</div>
+                                </div>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ $borrowing->tanggal_pinjam->format('d/m/Y') }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                            {{ $borrowing->tanggal_selesai ? $borrowing->tanggal_selesai->format('d/m/Y') : '-' }}
+                        <td class="px-6 py-4">
+                            <div class="text-xs space-y-1">
+                                <div class="text-gray-600 dark:text-gray-300 flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[14px] text-gray-400">calendar_today</span>
+                                    {{ $borrowing->tanggal_pinjam->format('d/m/Y') }}
+                                </div>
+                                <div class="text-gray-400 flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[14px]">event_busy</span>
+                                    {{ $borrowing->jatuh_tempo ? $borrowing->jatuh_tempo->format('d/m/Y') : '-' }}
+                                </div>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                            <ul class="text-gray-600 dark:text-gray-300 space-y-1">
-                                @foreach($borrowing->borrowingDetails as $detail)
-                                    <li class="flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
-                                        {{ $detail->tool->nama_alat }} <span class="text-gray-500 dark:text-gray-400">({{ $detail->jumlah }})</span>
-                                    </li>
+                        <td class="px-6 py-4">
+                            <div class="space-y-1">
+                                @foreach($borrowing->borrowingDetails->take(2) as $detail)
+                                    <div class="text-xs text-gray-600 dark:text-gray-300 flex items-center gap-2">
+                                        <span class="w-1 h-1 rounded-full bg-primary"></span>
+                                        {{ $detail->tool->nama_alat }} ({{ $detail->jumlah }})
+                                    </div>
                                 @endforeach
-                            </ul>
+                                @if($borrowing->borrowingDetails->count() > 2)
+                                    <div class="text-[10px] text-gray-400 italic pl-3">+ {{ $borrowing->borrowingDetails->count() - 2 }} lainnya</div>
+                                @endif
+                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-3 py-1 text-xs font-bold rounded uppercase tracking-wider border
-                                @if($borrowing->status == 'disetujui') bg-green-500/10 text-green-400 border-green-500/20
-                                @elseif($borrowing->status == 'ditolak') bg-red-500/10 text-red-400 border-red-500/20
-                                @elseif($borrowing->status == 'dikembalikan') bg-blue-500/10 text-blue-400 border-blue-500/20
-                                @else bg-yellow-500/10 text-yellow-400 border-yellow-500/20
-                                @endif">
+                        <td class="px-6 py-4">
+                            <x-badge :type="match($borrowing->status) {
+                                'disetujui' => 'info',
+                                'dikembalikan' => 'success',
+                                'ditolak' => 'danger',
+                                default => 'warning'
+                            }" size="sm">
                                 {{ ucfirst($borrowing->status) }}
-                            </span>
+                            </x-badge>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex flex-col gap-2">
-                                <a href="{{ route('petugas.borrowings.show', $borrowing) }}" class="text-blue-400 hover:text-blue-300 inline-flex items-center gap-1 transition-colors">
-                                    <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                    Detail
-                                </a>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex flex-col items-end gap-1">
+                                <x-button variant="ghost" size="sm" :href="route('petugas.borrowings.show', $borrowing)" icon="visibility" class="text-blue-500">Detail</x-button>
+                                
                                 @if($borrowing->status == 'menunggu')
-                                    <div class="flex gap-2">
+                                    <div class="flex gap-1 mt-1">
                                         <form method="POST" action="{{ route('petugas.borrowings.approve', $borrowing) }}" class="inline approve-form" data-id="{{ $borrowing->id }}">
                                             @csrf
-                                            <button type="button" onclick="handleApproveBorrowing(this)" class="text-green-400 hover:text-green-300 inline-flex items-center gap-1 transition-colors">
-                                                <span class="material-symbols-outlined text-[18px]">check_circle</span>
-                                                Setujui
-                                            </button>
+                                                <x-button variant="success" size="sm" type="button" class="font-bold gap-1" onclick="handleApproveBorrowing(this)">
+                                                    <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                                                    Setujui
+                                                </x-button>
                                         </form>
-                                        <button onclick="showRejectModal({{ $borrowing->id }}, '{{ route('petugas.borrowings.reject', $borrowing) }}')" class="text-red-400 hover:text-red-300 inline-flex items-center gap-1 transition-colors">
-                                            <span class="material-symbols-outlined text-[18px]">cancel</span>
-                                            Tolak
-                                        </button>
+                                            <x-button variant="danger" size="sm" type="button" class="font-bold gap-1" onclick="showRejectModal({{ $borrowing->id }}, '{{ route('petugas.borrowings.reject', $borrowing) }}')">
+                                                <span class="material-symbols-outlined text-[18px]">cancel</span>
+                                                Tolak
+                                            </x-button>
                                     </div>
                                 @endif
+                                <x-button variant="ghost" size="sm" :href="route('petugas.borrowings.print', $borrowing)" icon="print" class="text-gray-500 mt-1">Print</x-button>
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12">
-                            <div class="flex flex-col items-center justify-center text-center">
-                                <span class="material-symbols-outlined text-gray-600 text-[64px] mb-4">assignment_turned_in</span>
-                                <p class="text-gray-400 text-lg font-medium">Tidak ada data peminjaman</p>
-                            </div>
+                        <td colspan="5">
+                            <x-empty-state 
+                                icon="pending_actions"
+                                title="Tidak Ada Peminjaman"
+                                description="Belum ada transaksi peminjaman yang masuk atau filter tidak sesuai."
+                            />
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-        {{ $borrowings->links('vendor.pagination.industrial') }}
-    </div>
-</div>
+    @if($borrowings->hasPages())
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-panel-dark">
+            {{ $borrowings->links('vendor.pagination.industrial') }}
+        </div>
+    @endif
+</x-card>
 
 <!-- Modal Tolak -->
 <div id="rejectModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
