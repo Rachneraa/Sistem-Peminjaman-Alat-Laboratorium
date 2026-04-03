@@ -59,10 +59,11 @@ class Borrowing extends Model
     /**
      * Hitung estimasi denda berdasarkan tanggal sekarang
      */
-    public function calculateEstimatedFine($denda_per_hari = 5000): array
+    public function calculateEstimatedFine($denda_per_hari = null): array
     {
         $tanggalSelesai = $this->tanggal_selesai ?? $this->jatuh_tempo;
-        
+        $dendaPerHari = $denda_per_hari ?? $this->calculateDendaPerHariTotal();
+
         if (!$tanggalSelesai) {
             return [
                 'denda' => 0,
@@ -73,9 +74,26 @@ class Borrowing extends Model
         // Gunakan startOfDay() untuk memastikan perhitungan konsisten
         // Parse tanggal selesai sebagai Carbon instance untuk konsistensi
         $tanggalSekarang = \Carbon\Carbon::now()->startOfDay();
-        $tanggalSelesaiCarbon = \Carbon\Carbon::parse($tanggalSelesai)->startOfDay();
-        
-        return DendaHelper::hitungDenda($tanggalSekarang, $tanggalSelesaiCarbon, $denda_per_hari);
+        $tanggalSelesaiValue = $tanggalSelesai instanceof \DateTimeInterface
+            ? $tanggalSelesai->format('Y-m-d')
+            : $tanggalSelesai;
+        $tanggalSelesaiCarbon = \Carbon\Carbon::parse($tanggalSelesaiValue)->startOfDay();
+
+        return DendaHelper::hitungDenda($tanggalSekarang, $tanggalSelesaiCarbon, $dendaPerHari);
+    }
+
+    /**
+     * Hitung total denda per hari berdasarkan alat yang dipinjam
+     */
+    public function calculateDendaPerHariTotal(): float
+    {
+        $this->loadMissing('borrowingDetails.tool');
+
+        $total = $this->borrowingDetails->reduce(function ($carry, $detail) {
+            return $carry + ((float) ($detail->tool->denda_per_hari ?? 0) * (int) $detail->jumlah);
+        }, 0.0);
+
+        return $total > 0 ? $total : 5000;
     }
 
     /**

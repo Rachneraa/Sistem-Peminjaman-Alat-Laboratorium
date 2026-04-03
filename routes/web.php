@@ -7,6 +7,8 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ToolController;
 use App\Http\Controllers\Admin\BorrowingController as AdminBorrowingController;
+use App\Http\Controllers\Admin\DatabaseBackupController;
+use App\Http\Controllers\Admin\DendaSettingController;
 use App\Http\Controllers\Admin\ReturnController as AdminReturnController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\ReportController;
@@ -32,20 +34,10 @@ Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Dashboard berdasarkan role
-Route::get('/', function () {
-    if (auth()->check()) {
-        $user = auth()->user();
-        if ($user->isAdmin()) {
-            return redirect()->route('admin.dashboard');
-        } elseif ($user->isPetugas()) {
-            return redirect()->route('petugas.dashboard');
-        } else {
-            return redirect()->route('peminjam.dashboard');
-        }
-    }
-    return redirect()->route('login');
-});
+// Landing Page & Public Routes
+Route::get('/', [App\Http\Controllers\LandingController::class, 'index'])->name('landing.index');
+Route::get('/alat', [App\Http\Controllers\LandingController::class, 'tools'])->name('landing.tools');
+Route::get('/pinjam/{id}', [App\Http\Controllers\LandingController::class, 'pinjam'])->name('landing.pinjam');
 
 // Middleware auth
 Route::middleware(['auth'])->group(function () {
@@ -67,7 +59,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('users-export', [App\Http\Controllers\Admin\UserExportImportController::class, 'export'])->name('users.export');
         Route::post('users-import', [App\Http\Controllers\Admin\UserExportImportController::class, 'import'])->name('users.import');
         Route::get('users-template', [App\Http\Controllers\Admin\UserExportImportController::class, 'template'])->name('users.template');
-        
+
         // Categories
         Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
@@ -76,22 +68,30 @@ Route::middleware(['auth'])->group(function () {
         Route::get('categories-export', [App\Http\Controllers\Admin\CategoryExportImportController::class, 'export'])->name('categories.export');
         Route::post('categories-import', [App\Http\Controllers\Admin\CategoryExportImportController::class, 'import'])->name('categories.import');
         Route::get('categories-template', [App\Http\Controllers\Admin\CategoryExportImportController::class, 'template'])->name('categories.template');
-        
+
         // Tools
         Route::resource('tools', ToolController::class);
         Route::get('tools-export', [App\Http\Controllers\Admin\ToolExportImportController::class, 'export'])->name('tools.export');
         Route::post('tools-import', [App\Http\Controllers\Admin\ToolExportImportController::class, 'import'])->name('tools.import');
         Route::get('tools-template', [App\Http\Controllers\Admin\ToolExportImportController::class, 'template'])->name('tools.template');
-        
+
+        // Fine settings
+        Route::get('denda', [DendaSettingController::class, 'index'])->name('denda.index');
+        Route::get('denda-export', [DendaSettingController::class, 'export'])->name('denda.export');
+        Route::post('denda', [DendaSettingController::class, 'update'])->name('denda.update');
+
+        // Database export
+        Route::post('database-export', [DatabaseBackupController::class, 'export'])->name('database.export');
+
         // Borrowings
         Route::resource('borrowings', AdminBorrowingController::class);
-        
+
         // Returns
         Route::resource('returns', AdminReturnController::class);
-        
+
         // Activity Logs
         Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
-        
+
         // Reports
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/borrowing', [ReportController::class, 'borrowingReport'])->name('reports.borrowing');
@@ -108,17 +108,17 @@ Route::middleware(['auth'])->group(function () {
         Route::post('borrowings/{borrowing}/reminder', [PetugasBorrowingController::class, 'sendReminder'])->name('borrowings.reminder');
         Route::post('borrowings/{borrowing}/fine-notification', [PetugasBorrowingController::class, 'sendFineNotification'])->name('borrowings.fine-notification');
         Route::get('borrowings/{borrowing}/print', [PetugasBorrowingController::class, 'print'])->name('borrowings.print');
-        
+
         // Halaman Memantau Pengembalian
         Route::get('returns', [PetugasReturnController::class, 'index'])->name('returns.index');
         Route::post('borrowings/{borrowing}/return', [PetugasReturnController::class, 'processReturn'])->name('borrowings.return');
-        
+
         // Halaman Semua Peminjaman (lengkap)
         Route::get('borrowings-all', [PetugasBorrowingController::class, 'all'])->name('borrowings.all');
-        
+
         // Halaman Semua Pengembalian (lengkap)
         Route::get('returns-all', [PetugasReturnController::class, 'all'])->name('returns.all');
-        
+
         // Reports untuk Petugas
         Route::get('reports', [PetugasReportController::class, 'index'])->name('reports.index');
         Route::get('reports/borrowing', [PetugasReportController::class, 'borrowingReport'])->name('reports.borrowing');

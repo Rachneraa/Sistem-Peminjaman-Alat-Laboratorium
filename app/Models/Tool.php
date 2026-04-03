@@ -18,11 +18,22 @@ class Tool extends Model
         'stok',
         'stok_rusak',
         'stok_perbaikan',
+        'denda_per_hari',
         'kondisi',
         'status',
         'deskripsi',
         'gambar',
     ];
+
+    /**
+     * Attribute casting
+     */
+    protected function casts(): array
+    {
+        return [
+            'denda_per_hari' => 'decimal:2',
+        ];
+    }
 
     /**
      * Relasi many-to-one dengan categories

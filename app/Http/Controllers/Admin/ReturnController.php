@@ -32,9 +32,9 @@ class ReturnController extends Controller
         // Search by user name
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('borrowing.user', function($q) use ($search) {
+            $query->whereHas('borrowing.user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -53,9 +53,9 @@ class ReturnController extends Controller
             ->whereDoesntHave('return')
             ->orderBy('tanggal_pinjam', 'desc')
             ->get();
-        
+
         // Siapkan data untuk JavaScript
-        $borrowingsData = $borrowings->map(function($borrowing) {
+        $borrowingsData = $borrowings->map(function ($borrowing) {
             return [
                 'id' => $borrowing->id,
                 'user' => [
@@ -63,7 +63,7 @@ class ReturnController extends Controller
                 ],
                 'tanggal_pinjam' => $borrowing->tanggal_pinjam->format('d/m/Y'),
                 'tanggal_selesai' => $borrowing->tanggal_selesai ? $borrowing->tanggal_selesai->format('d/m/Y') : null,
-                'borrowing_details' => $borrowing->borrowingDetails->map(function($detail) {
+                'borrowing_details' => $borrowing->borrowingDetails->map(function ($detail) {
                     return [
                         'tool' => [
                             'nama_alat' => $detail->tool->nama_alat,
@@ -73,7 +73,7 @@ class ReturnController extends Controller
                 }),
             ];
         });
-        
+
         return view('admin.returns.create', compact('borrowings', 'borrowingsData'));
     }
 
@@ -92,7 +92,7 @@ class ReturnController extends Controller
         DB::beginTransaction();
         try {
             $borrowing = Borrowing::findOrFail($validated['borrowing_id']);
-            
+
             // Validasi: hanya peminjaman yang disetujui atau menunggu pengembalian
             if (!in_array($borrowing->status, ['disetujui', 'menunggu_pengembalian'])) {
                 return back()->with('error', 'Hanya peminjaman yang disetujui atau menunggu pengembalian yang bisa dikembalikan.')
@@ -102,7 +102,8 @@ class ReturnController extends Controller
             // Hitung denda
             $tanggal_kembali = \Carbon\Carbon::parse($validated['tanggal_kembali']);
             $tanggal_selesai = $borrowing->tanggal_selesai ?? $borrowing->jatuh_tempo;
-            $dendaData = DendaHelper::hitungDenda($tanggal_kembali, $tanggal_selesai);
+            $dendaPerHari = $borrowing->calculateDendaPerHariTotal();
+            $dendaData = DendaHelper::hitungDenda($tanggal_kembali, $tanggal_selesai, $dendaPerHari);
             $dendaKerusakan = $validated['denda_kerusakan'] ?? 0;
 
             // Kembalikan stok alat
@@ -206,7 +207,7 @@ class ReturnController extends Controller
         DB::beginTransaction();
         try {
             $borrowing = $return->borrowing;
-            
+
             // Kembalikan status peminjaman menjadi disetujui
             if ($borrowing->status === 'dikembalikan') {
                 // Kurangi stok kembali (karena pengembalian dihapus)

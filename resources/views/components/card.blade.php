@@ -7,7 +7,15 @@
     'hover' => false,
 ])
 
-<div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl industrial-border {{ $hover ? 'hover-glow hover-lift cursor-pointer' : '' }} transition-smooth" {{ $attributes }}>
+@php
+    $cardClasses = 'bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl shadow-sm transition-smooth hover:border-blue-200 dark:hover:border-blue-400/30';
+
+    if ($hover) {
+        $cardClasses .= ' hover-glow hover-lift cursor-pointer';
+    }
+@endphp
+
+<div {{ $attributes->merge(['class' => $cardClasses]) }}>
     @if($title || $icon)
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700/50 flex items-center {{ $subtitle ? 'gap-3' : 'justify-between' }}">
             @if($icon)

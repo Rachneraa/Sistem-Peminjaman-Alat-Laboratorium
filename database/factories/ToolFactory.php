@@ -15,6 +15,7 @@ class ToolFactory extends Factory
             'nama_alat' => fake()->words(2, true),
             'kategori_id' => Category::factory(),
             'stok' => fake()->numberBetween(0, 50),
+            'denda_per_hari' => fake()->numberBetween(3000, 7000),
             'kondisi' => fake()->randomElement(['baik', 'rusak', 'perlu_perbaikan']),
             'deskripsi' => fake()->sentence(),
         ];

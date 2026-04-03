@@ -1,20 +1,43 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Laporan Pengembalian</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        h1 { text-align: center; }
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            text-align: center;
+        }
     </style>
 </head>
+
 <body>
     <h1>Laporan Pengembalian Alat</h1>
-    <p>Periode: {{ \Carbon\Carbon::parse($start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($end_date)->format('d/m/Y') }}</p>
-    
+    <p>Periode Input: {{ \Carbon\Carbon::parse($display_start_date)->format('d/m/Y') }} -
+        {{ \Carbon\Carbon::parse($display_end_date)->format('d/m/Y') }}</p>
+    <p>Urutan Data: {{ $orderDirection === 'desc' ? 'Mundur (terbaru ke terlama)' : 'Maju (terlama ke terbaru)' }}</p>
+
     <table>
         <thead>
             <tr>
@@ -65,14 +88,11 @@
             </tr>
             <tr style="border-top: 2px solid #333;">
                 <td colspan="6" style="text-align: right; font-weight: bold; font-size: 14px;">TOTAL KESELURUHAN:</td>
-                <td style="font-weight: bold; font-size: 14px;">Rp {{ number_format($totalKeseluruhan, 0, ',', '.') }}</td>
+                <td style="font-weight: bold; font-size: 14px;">Rp {{ number_format($totalKeseluruhan, 0, ',', '.') }}
+                </td>
             </tr>
         </tfoot>
     </table>
 </body>
+
 </html>
-
-
-
-
-

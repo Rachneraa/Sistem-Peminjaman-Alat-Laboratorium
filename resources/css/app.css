@@ -4,10 +4,10 @@
 
 @layer base {
     body {
-        @apply bg-gray-900 text-gray-100 antialiased;
+        @apply bg-slate-50 text-slate-800 antialiased;
     }
     h1, h2, h3, h4, h5, h6 {
-        @apply font-semibold text-white;
+        @apply font-semibold text-slate-900;
     }
     /* Smooth scroll */
     html {
@@ -26,22 +26,22 @@
         @apply transform scale-[0.98];
     }
     .btn-primary {
-        @apply btn bg-[#0d5868] text-white hover:bg-[#0d5868]/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d5868];
+        @apply btn bg-[#2563EB] text-white hover:bg-[#2563EB]/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563EB];
     }
     .btn-secondary {
-        @apply btn bg-gray-700 text-gray-100 hover:bg-gray-600;
+        @apply btn bg-white text-slate-700 border border-slate-200 hover:bg-slate-50;
     }
     .btn-danger {
         @apply btn bg-red-600 text-white hover:bg-red-700;
     }
     .card {
-        @apply rounded-xl border border-gray-700 bg-gray-800 shadow-sm transition-all duration-200;
+        @apply rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200;
     }
     .card-hover {
-        @apply card hover:shadow-lg hover:shadow-gray-900/50 hover:-translate-y-0.5 hover:border-gray-600;
+        @apply card hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 hover:border-blue-200;
     }
     .card-header {
-        @apply px-6 py-4 border-b border-gray-700 flex items-center justify-between;
+        @apply px-6 py-4 border-b border-slate-200 flex items-center justify-between;
     }
     .card-body {
         @apply px-6 py-4;
@@ -50,7 +50,7 @@
         @apply min-w-full divide-y divide-gray-700;
     }
     .table-head {
-        @apply bg-gray-800 text-left text-xs font-semibold uppercase tracking-wide text-gray-400;
+        @apply bg-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-500;
     }
     .table-cell {
         @apply px-6 py-3;
@@ -71,12 +71,12 @@
         @apply badge bg-blue-500/20 text-blue-400;
     }
     .input {
-        @apply w-full rounded-lg border border-gray-700 bg-gray-800 text-white py-2 text-sm shadow-sm transition-all duration-200 focus:border-[#0d5868] focus:outline-none focus:ring-2 focus:ring-[#0d5868]/20 placeholder-gray-500;
+        @apply w-full rounded-lg border border-slate-300 bg-white text-slate-900 py-2 text-sm shadow-sm transition-all duration-200 focus:border-[#2563EB] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 placeholder-slate-400;
         padding-left: 0.75rem;
         padding-right: 0.75rem;
     }
     .input:focus {
-        @apply shadow-md shadow-[#0d5868]/10;
+        @apply shadow-md shadow-[#2563EB]/10;
     }
     .input-error {
         @apply input border-red-500 focus:border-red-500 focus:ring-red-500/20;
@@ -85,38 +85,38 @@
         @apply input border-green-500 focus:border-green-500 focus:ring-green-500/20;
     }
     .input option {
-        @apply bg-gray-800 text-white;
+        @apply bg-white text-slate-900;
     }
     select.input {
-        @apply bg-gray-800 text-white;
+        @apply bg-white text-slate-900;
     }
     select.input option {
-        @apply bg-gray-800 text-white;
+        @apply bg-white text-slate-900;
     }
     textarea.input {
         @apply resize-y;
     }
     .section-title {
-        @apply text-lg font-semibold text-white;
+        @apply text-lg font-semibold text-slate-900;
     }
     .subtext {
-        @apply text-sm text-gray-400;
+        @apply text-sm text-slate-500;
     }
     
     /* Sticky Table Header */
     .sticky-header {
-        @apply sticky top-0 z-10 bg-gray-50 dark:bg-gray-800;
+        @apply sticky top-0 z-10 bg-slate-50 dark:bg-gray-800;
     }
 }
 
 @layer utilities {
     .glass {
-        @apply bg-gray-800/80 backdrop-blur-md border border-gray-700/50;
+        @apply bg-white/80 backdrop-blur-md border border-slate-200/70;
     }
     
     /* ===== LOADING STATES ===== */
     .skeleton {
-        @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
+        @apply animate-pulse bg-slate-200 dark:bg-gray-700 rounded;
     }
     
     /* ===== ANIMATIONS ===== */
@@ -230,7 +230,7 @@
         left: 0;
         right: 0;
         height: 2px;
-        background: linear-gradient(90deg, transparent, rgba(13, 88, 104, 0.5), transparent);
+        background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.5), transparent);
         opacity: 0;
         transition: opacity 0.3s ease;
     }

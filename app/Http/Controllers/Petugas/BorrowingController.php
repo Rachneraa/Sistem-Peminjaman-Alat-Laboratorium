@@ -153,13 +153,13 @@ class BorrowingController extends Controller
         }
 
         // Hitung estimasi denda
-        $fineData = $borrowing->calculateEstimatedFine();
+        $fineData = $borrowing->calculateEstimatedFine($borrowing->calculateDendaPerHariTotal());
 
         // Kirim notifikasi estimasi denda
         NotificationService::notifyFineEstimation(
-            $borrowing, 
-            $fineData['denda'], 
-            $fineData['terlambat_hari'], 
+            $borrowing,
+            $fineData['denda'],
+            $fineData['terlambat_hari'],
             auth()->user()
         );
 
@@ -187,9 +187,9 @@ class BorrowingController extends Controller
         // Search by user name
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('user', function($q) use ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 

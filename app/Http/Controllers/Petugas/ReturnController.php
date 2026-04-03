@@ -27,13 +27,13 @@ class ReturnController extends Controller
         // Filter berdasarkan status terlambat
         if ($request->has('filter')) {
             if ($request->filter == 'terlambat') {
-                $query->where(function($q) {
+                $query->where(function ($q) {
                     $q->whereNotNull('tanggal_selesai')
-                      ->where('tanggal_selesai', '<', now())
-                      ->orWhere(function($q2) {
-                          $q2->whereNotNull('jatuh_tempo')
-                             ->where('jatuh_tempo', '<', now());
-                      });
+                        ->where('tanggal_selesai', '<', now())
+                        ->orWhere(function ($q2) {
+                            $q2->whereNotNull('jatuh_tempo')
+                                ->where('jatuh_tempo', '<', now());
+                        });
                 });
             }
         }
@@ -64,10 +64,11 @@ class ReturnController extends Controller
             // Hitung denda berdasarkan tanggal selesai (tanggal_selesai dari form)
             $tanggal_kembali = \Carbon\Carbon::parse($validated['tanggal_kembali']);
             $tanggal_selesai = $borrowing->tanggal_selesai ?? $borrowing->jatuh_tempo;
-            
+
             // Denda dihitung dari tanggal selesai, bukan jatuh tempo
-            $dendaData = DendaHelper::hitungDenda($tanggal_kembali, $tanggal_selesai);
-            
+            $dendaPerHari = $borrowing->calculateDendaPerHariTotal();
+            $dendaData = DendaHelper::hitungDenda($tanggal_kembali, $tanggal_selesai, $dendaPerHari);
+
             // Denda kerusakan dari input petugas
             $dendaKerusakan = $validated['denda_kerusakan'] ?? 0;
 
@@ -103,7 +104,7 @@ class ReturnController extends Controller
             DB::commit();
             $totalDenda = $dendaData['denda'] + $dendaKerusakan;
             $message = 'Pengembalian berhasil diproses.';
-            
+
             $dendaDetails = [];
             if ($dendaData['denda'] > 0) {
                 $dendaDetails[] = 'Keterlambatan: Rp ' . number_format($dendaData['denda'], 0, ',', '.') . ' (' . $dendaData['terlambat_hari'] . ' hari)';
@@ -111,11 +112,11 @@ class ReturnController extends Controller
             if ($dendaKerusakan > 0) {
                 $dendaDetails[] = 'Kerusakan: Rp ' . number_format($dendaKerusakan, 0, ',', '.');
             }
-            
+
             if (count($dendaDetails) > 0) {
                 $message .= ' Total Denda: Rp ' . number_format($totalDenda, 0, ',', '.') . ' (' . implode(', ', $dendaDetails) . ')';
             }
-            
+
             return redirect()->route('petugas.borrowings.show', $borrowing)
                 ->with('success', $message);
         } catch (\Exception $e) {
@@ -143,9 +144,9 @@ class ReturnController extends Controller
         // Search by user name
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('borrowing.user', function($q) use ($search) {
+            $query->whereHas('borrowing.user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 

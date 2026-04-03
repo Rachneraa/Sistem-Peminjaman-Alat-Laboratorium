@@ -36,10 +36,10 @@ class BorrowingController extends Controller
             ->where('stok', '>', 0)
             ->with('category')
             ->get();
-        
+
         $selectedToolId = $request->get('tool_id');
         $selectedTool = null;
-        
+
         if ($selectedToolId) {
             $selectedTool = Tool::where('id', $selectedToolId)
                 ->where('status', 'tersedia')
@@ -47,7 +47,7 @@ class BorrowingController extends Controller
                 ->with('category')
                 ->first();
         }
-        
+
         return view('peminjam.borrowings.create', compact('tools', 'selectedToolId', 'selectedTool'));
     }
 

@@ -11,10 +11,10 @@
 
 @php
     $variantClasses = match($variant) {
-        'secondary' => 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600',
+        'secondary' => 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-blue-200 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-600',
         'danger' => 'bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/20',
         'success' => 'bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-600/20',
-        'ghost' => 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+        'ghost' => 'bg-transparent text-gray-700 dark:text-gray-300 hover:bg-primary/5 dark:hover:bg-white/10',
         default => 'bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/20', // primary
     };
     
@@ -25,7 +25,7 @@
     };
     
     $disabledClasses = ($disabled || $loading) ? 'opacity-50 cursor-not-allowed' : '';
-    $commonClasses = "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary {$variantClasses} {$sizeClasses} {$disabledClasses}";
+    $commonClasses = "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900 {$variantClasses} {$sizeClasses} {$disabledClasses}";
 @endphp
 
 @if($attributes->has('href'))
