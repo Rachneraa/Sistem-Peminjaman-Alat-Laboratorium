@@ -4,7 +4,7 @@
 
 @section('content')
     <!-- Header Area -->
-    <section class="bg-[#0B1426] py-12 px-6 md:px-12 w-full flex items-center relative overflow-hidden">
+    <section data-fade-up class="bg-[#0B1426] py-12 px-6 md:px-12 w-full flex items-center relative overflow-hidden">
         <!-- Decorative background elements -->
         <div class="absolute w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-3xl -top-20 -right-20"></div>
 
@@ -20,12 +20,12 @@
     </section>
 
     <!-- Tools List Section -->
-    <section class="py-16 px-6 md:px-12 bg-white relative">
+    <section data-fade-up class="py-16 px-6 md:px-12 bg-white relative">
         <div class="max-w-7xl mx-auto">
             <!-- Grid List -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
                 @forelse($tools as $tool)
-                    <div
+                    <div data-fade-up style="--fade-delay: {{ $loop->index * 70 }}ms;"
                         class="bg-white rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group relative">
                         <!-- Stock badge -->
                         <div

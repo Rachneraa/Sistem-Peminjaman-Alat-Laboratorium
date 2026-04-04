@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistem Peminjaman Alat</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
@@ -135,7 +136,7 @@
                             <span class="material-symbols-outlined text-[18px]">mail</span>
                             Alamat Email
                         </label>
-                        <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                        <input type="email" name="email" value="{{ old('email') }}" required maxlength="50" autofocus
                             class="form-input w-full rounded-lg text-gray-900 dark:text-white border border-gray-300 dark:border-input-border bg-gray-50 dark:bg-[#1a2e32] focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-[#94bdc7] px-4 text-base transition-all"
                             placeholder="nama@email.com" />
                     </div>
@@ -147,16 +148,28 @@
                             <span class="material-symbols-outlined text-[18px]">lock</span>
                             Password
                         </label>
-                        <input type="password" name="password" required
-                            class="form-input w-full rounded-lg text-gray-900 dark:text-white border border-gray-300 dark:border-input-border bg-gray-50 dark:bg-[#1a2e32] focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-[#94bdc7] px-4 text-base transition-all"
-                            placeholder="••••••••" />
+                        <div class="relative">
+                            <input id="login-password" type="password" name="password" required maxlength="60"
+                                class="form-input w-full rounded-lg text-gray-900 dark:text-white border border-gray-300 dark:border-input-border bg-gray-50 dark:bg-[#1a2e32] focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-[#94bdc7] px-4 pr-12 text-base transition-all"
+                                placeholder="••••••••" />
+                            <button type="button" data-toggle-password data-target="login-password"
+                                class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-primary transition-colors"
+                                aria-label="Tampilkan password">
+                                <span class="material-symbols-outlined text-[20px]" data-password-icon>visibility</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Remember Me -->
-                    <div class="flex items-center">
-                        <input type="checkbox" name="remember" id="remember"
-                            class="rounded border-gray-300 dark:border-input-border bg-white dark:bg-[#1a2e32] text-primary focus:ring-primary focus:ring-offset-white dark:focus:ring-offset-background-dark h-4 w-4">
-                        <label for="remember" class="ml-2 text-sm text-gray-600 dark:text-gray-400">Ingat saya</label>
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center">
+                            <input type="checkbox" name="remember" id="remember"
+                                class="rounded border-gray-300 dark:border-input-border bg-white dark:bg-[#1a2e32] text-primary focus:ring-primary focus:ring-offset-white dark:focus:ring-offset-background-dark h-4 w-4">
+                            <label for="remember" class="ml-2 text-sm text-gray-600 dark:text-gray-400">Ingat
+                                saya</label>
+                        </div>
+                        <a href="{{ route('password.request') }}"
+                            class="text-sm text-primary font-semibold hover:underline">Lupa password?</a>
                     </div>
 
                     <!-- Login Button -->
@@ -193,6 +206,41 @@
     </main>
 
     <!-- Refined Utility Footer Detail -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('[data-toggle-password]').forEach(function (toggleButton) {
+                toggleButton.addEventListener('click', function () {
+                    const targetId = toggleButton.getAttribute('data-target');
+                    const targetInput = document.getElementById(targetId);
+                    const icon = toggleButton.querySelector('[data-password-icon]');
+                    if (!targetInput || !icon) return;
+
+                    const isPassword = targetInput.type === 'password';
+                    targetInput.type = isPassword ? 'text' : 'password';
+                    icon.textContent = isPassword ? 'visibility_off' : 'visibility';
+                    toggleButton.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
+                });
+            });
+
+           @if (session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#0d5868',
+            });
+        @endif
+
+            @if ($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: '{{ $errors->first() }}',
+                    confirmButtonColor: '#0d5868',
+                });
+            @endif
+        });
+    </script>
 </body>
 
 </html>

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Sistem Peminjaman Alat')</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script type="module" src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
@@ -109,6 +110,60 @@
         ::-webkit-scrollbar-corner {
             background: #E2E8F0;
         }
+
+        #transition-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(248, 250, 252, 0.84);
+            backdrop-filter: blur(3px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .dark #transition-loader {
+            background: rgba(15, 23, 42, 0.86);
+        }
+
+        #transition-loader.is-active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #transition-loader dotlottie-player {
+            width: 84px;
+            height: 84px;
+            filter: drop-shadow(0 8px 20px rgba(37, 99, 235, 0.2));
+        }
+
+        #transition-loader .loader-spinner {
+            position: absolute;
+            width: 56px;
+            height: 56px;
+            border: 4px solid rgba(37, 99, 235, 0.16);
+            border-top-color: #2563EB;
+            border-radius: 50%;
+            animation: loader-spin 0.9s linear infinite;
+            opacity: 0;
+        }
+
+        #transition-loader.is-fallback .loader-spinner {
+            opacity: 1;
+        }
+
+        #transition-loader.is-fallback dotlottie-player {
+            opacity: 0;
+        }
+
+        @keyframes loader-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
     <script>
         // Check local storage for theme
@@ -122,6 +177,12 @@
 
 <body
     class="bg-background-light dark:bg-background-dark min-h-screen font-display text-gray-800 transition-colors duration-300">
+    <div id="transition-loader" aria-hidden="true">
+        <dotlottie-player id="transition-lottie" src="{{ asset('loading.lottie') }}" background="transparent" speed="1"
+            loop autoplay style="width:84px;height:84px"></dotlottie-player>
+        <div class="loader-spinner" aria-hidden="true"></div>
+    </div>
+
     <!-- Skeleton/Preloader -->
     <div id="page-loader" class="fixed inset-0 z-[60] bg-background-light dark:bg-background-dark flex min-h-screen">
         <!-- Sidebar Skeleton -->
@@ -426,8 +487,93 @@
     @include('components.confirm-modal')
 
     <script>
+        let transitionInProgress = false;
+
+        function showTransitionLoader() {
+            const loader = document.getElementById('transition-loader');
+            if (!loader) return;
+            loader.classList.add('is-active');
+        }
+
+        function shouldTriggerTransitionLoader(link, event) {
+            if (!link || !link.href) return false;
+            if (event && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)) return false;
+
+            const rawHref = link.getAttribute('href') || '';
+            if (!rawHref || rawHref.startsWith('#')) return false;
+            if (rawHref.startsWith('javascript:') || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:')) return false;
+            if (link.hasAttribute('download')) return false;
+            if ((link.getAttribute('target') || '').toLowerCase() === '_blank') return false;
+
+            const targetUrl = new URL(link.href, window.location.origin);
+            if (targetUrl.origin !== window.location.origin) return false;
+
+            const isSamePageAnchor = targetUrl.pathname === window.location.pathname &&
+                targetUrl.search === window.location.search &&
+                targetUrl.hash;
+
+            return !isSamePageAnchor;
+        }
+
+        function attachTransitionLoaderHandlers() {
+            document.querySelectorAll('a[href]').forEach((link) => {
+                link.addEventListener('click', (event) => {
+                    if (!shouldTriggerTransitionLoader(link, event)) return;
+                    if (transitionInProgress) return;
+
+                    transitionInProgress = true;
+                    event.preventDefault();
+                    showTransitionLoader();
+
+                    setTimeout(() => {
+                        window.location.assign(link.href);
+                    }, 140);
+                });
+            });
+
+            document.addEventListener('submit', (event) => {
+                const form = event.target;
+                if (!(form instanceof HTMLFormElement)) return;
+                if ((form.getAttribute('target') || '').toLowerCase() === '_blank') return;
+                if (transitionInProgress) return;
+
+                transitionInProgress = true;
+                event.preventDefault();
+                showTransitionLoader();
+
+                setTimeout(() => {
+                    form.submit();
+                }, 140);
+            }, true);
+        }
+
+        function initTransitionLoaderVisual() {
+            const lottiePlayer = document.getElementById('transition-lottie');
+            const loader = document.getElementById('transition-loader');
+            if (!lottiePlayer || !loader) return;
+
+            const useFallback = () => {
+                loader.classList.add('is-fallback');
+            };
+
+            lottiePlayer.addEventListener('ready', () => {
+                loader.classList.remove('is-fallback');
+            });
+
+            lottiePlayer.addEventListener('error', useFallback);
+
+            setTimeout(() => {
+                if (!customElements.get('dotlottie-player')) {
+                    useFallback();
+                }
+            }, 1800);
+        }
+
         // Sidebar toggle
         document.addEventListener('DOMContentLoaded', function () {
+            initTransitionLoaderVisual();
+            attachTransitionLoaderHandlers();
+
             const sidebar = document.getElementById('sidebar');
             const sidebarToggle = document.getElementById('sidebar-toggle');
             const sidebarClose = document.getElementById('sidebar-close');

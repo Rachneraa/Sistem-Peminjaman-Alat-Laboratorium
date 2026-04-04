@@ -133,7 +133,7 @@
                             <span class="material-symbols-outlined text-[18px]">person</span>
                             Nama Lengkap
                         </label>
-                        <input type="text" name="name" value="{{ old('name') }}" required autofocus
+                        <input type="text" name="name" value="{{ old('name') }}" required maxlength="50" autofocus
                             class="form-input w-full rounded-lg text-gray-900 dark:text-white border border-gray-300 dark:border-input-border bg-gray-50 dark:bg-[#1a2e32] focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-[#94bdc7] px-4 text-base transition-all"
                             placeholder="Contoh: John Doe" />
                     </div>
@@ -145,7 +145,7 @@
                             <span class="material-symbols-outlined text-[18px]">mail</span>
                             Alamat Email
                         </label>
-                        <input type="email" name="email" value="{{ old('email') }}" required
+                        <input type="email" name="email" value="{{ old('email') }}" required maxlength="50"
                             class="form-input w-full rounded-lg text-gray-900 dark:text-white border border-gray-300 dark:border-input-border bg-gray-50 dark:bg-[#1a2e32] focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-[#94bdc7] px-4 text-base transition-all"
                             placeholder="nama@email.com" />
                     </div>
@@ -157,9 +157,16 @@
                             <span class="material-symbols-outlined text-[18px]">lock</span>
                             Password
                         </label>
-                        <input type="password" name="password" required
-                            class="form-input w-full rounded-lg text-gray-900 dark:text-white border border-gray-300 dark:border-input-border bg-gray-50 dark:bg-[#1a2e32] focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-[#94bdc7] px-4 text-base transition-all"
-                            placeholder="••••••••" />
+                        <div class="relative">
+                            <input id="register-password" type="password" name="password" required maxlength="60"
+                                class="form-input w-full rounded-lg text-gray-900 dark:text-white border border-gray-300 dark:border-input-border bg-gray-50 dark:bg-[#1a2e32] focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-[#94bdc7] px-4 pr-12 text-base transition-all"
+                                placeholder="••••••••" />
+                            <button type="button" data-toggle-password data-target="register-password"
+                                class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-primary transition-colors"
+                                aria-label="Tampilkan password">
+                                <span class="material-symbols-outlined text-[20px]" data-password-icon>visibility</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Confirm Password Field -->
@@ -169,9 +176,17 @@
                             <span class="material-symbols-outlined text-[18px]">shield</span>
                             Konfirmasi Password
                         </label>
-                        <input type="password" name="password_confirmation" required
-                            class="form-input w-full rounded-lg text-gray-900 dark:text-white border border-gray-300 dark:border-input-border bg-gray-50 dark:bg-[#1a2e32] focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-[#94bdc7] px-4 text-base transition-all"
-                            placeholder="••••••••" />
+                        <div class="relative">
+                            <input id="register-password-confirmation" type="password" name="password_confirmation"
+                                required maxlength="60"
+                                class="form-input w-full rounded-lg text-gray-900 dark:text-white border border-gray-300 dark:border-input-border bg-gray-50 dark:bg-[#1a2e32] focus:border-primary h-12 placeholder:text-gray-400 dark:placeholder:text-[#94bdc7] px-4 pr-12 text-base transition-all"
+                                placeholder="••••••••" />
+                            <button type="button" data-toggle-password data-target="register-password-confirmation"
+                                class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-primary transition-colors"
+                                aria-label="Tampilkan password">
+                                <span class="material-symbols-outlined text-[20px]" data-password-icon>visibility</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Register Button -->
@@ -194,6 +209,23 @@
     </main>
 
     <!-- Refined Utility Footer Detail -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('[data-toggle-password]').forEach(function (toggleButton) {
+                toggleButton.addEventListener('click', function () {
+                    const targetId = toggleButton.getAttribute('data-target');
+                    const targetInput = document.getElementById(targetId);
+                    const icon = toggleButton.querySelector('[data-password-icon]');
+                    if (!targetInput || !icon) return;
+
+                    const isPassword = targetInput.type === 'password';
+                    targetInput.type = isPassword ? 'text' : 'password';
+                    icon.textContent = isPassword ? 'visibility_off' : 'visibility';
+                    toggleButton.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

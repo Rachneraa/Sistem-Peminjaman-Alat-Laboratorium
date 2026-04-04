@@ -5,7 +5,7 @@
 @section('content')
 
     <!-- Hero Section -->
-    <section
+    <section data-fade-up
         class="hero-pattern pt-20 pb-28 px-6 md:px-12 w-full lg:min-h-[85vh] flex items-center relative overflow-hidden">
         <!-- Decorative background elements -->
         <div class="absolute w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-3xl -bottom-48 -right-20"></div>
@@ -108,9 +108,9 @@
     </section>
 
     <!-- Cara Peminjaman Section -->
-    <section id="cara-peminjaman" class="py-24 px-6 md:px-12 bg-white relative">
+    <section id="cara-peminjaman" data-fade-up class="py-24 px-6 md:px-12 bg-white relative">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center max-w-2xl mx-auto mb-16">
+            <div class="text-center max-w-2xl mx-auto mb-16" data-fade-up style="--fade-delay: 100ms;">
                 <h4 class="text-blue-600 font-bold tracking-widest uppercase text-xs mb-3">CARA PEMINJAMAN</h4>
                 <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Tiga langkah mudah,<br />alat siap di tangan
                 </h2>
@@ -125,7 +125,7 @@
                 </div>
 
                 <!-- Step 1 -->
-                <div
+                <div data-fade-up style="--fade-delay: 0ms;"
                     class="bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] transition duration-300 rounded-2xl p-8 relative z-10 flex flex-col sm:flex-row md:flex-col gap-6">
                     <div
                         class="w-14 h-14 bg-landing-primary text-white text-2xl font-black flex items-center justify-center rounded-xl shadow-lg shadow-blue-500/30 flex-shrink-0">
@@ -138,7 +138,7 @@
                 </div>
 
                 <!-- Step 2 -->
-                <div
+                <div data-fade-up style="--fade-delay: 120ms;"
                     class="bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] transition duration-300 rounded-2xl p-8 relative z-10 flex flex-col sm:flex-row md:flex-col gap-6">
                     <div
                         class="w-14 h-14 bg-landing-primary text-white text-2xl font-black flex items-center justify-center rounded-xl shadow-lg shadow-blue-500/30 flex-shrink-0">
@@ -151,7 +151,7 @@
                 </div>
 
                 <!-- Step 3 -->
-                <div
+                <div data-fade-up style="--fade-delay: 240ms;"
                     class="bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] transition duration-300 rounded-2xl p-8 relative z-10 flex flex-col sm:flex-row md:flex-col gap-6">
                     <div
                         class="w-14 h-14 bg-landing-primary text-white text-2xl font-black flex items-center justify-center rounded-xl shadow-lg shadow-blue-500/30 flex-shrink-0">
@@ -167,9 +167,10 @@
     </section>
 
     <!-- Featured Tools Section -->
-    <section class="py-24 px-6 md:px-12 bg-gray-50/50 border-t border-gray-100">
+    <section data-fade-up class="py-24 px-6 md:px-12 bg-gray-50/50 border-t border-gray-100">
         <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12" data-fade-up
+                style="--fade-delay: 100ms;">
                 <div>
                     <h4 class="text-blue-600 font-bold tracking-widest uppercase text-xs mb-2">DAFTAR ALAT</h4>
                     <h2 class="text-3xl font-bold text-gray-900">Alat Lab Unggulan</h2>
@@ -193,7 +194,7 @@
                     }
                 </style>
                 @forelse($featuredTools as $tool)
-                    <div
+                    <div data-fade-up style="--fade-delay: {{ $loop->index * 90 }}ms;"
                         class="bg-white rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group relative w-[280px] sm:w-[300px] flex-none snap-center">
                         <!-- Stock badge -->
                         <div

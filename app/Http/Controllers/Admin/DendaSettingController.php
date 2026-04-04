@@ -15,7 +15,7 @@ class DendaSettingController extends Controller
      */
     public function index()
     {
-        $tools = Tool::with('category')->orderBy('nama_alat')->get();
+        $tools = Tool::with('category')->orderBy('nama_alat')->paginate(10);
 
         return view('admin.denda.index', compact('tools'));
     }
@@ -67,18 +67,31 @@ class DendaSettingController extends Controller
      */
     public function update(Request $request)
     {
-        $validated = $request->validate([
-            'tools' => 'required|array|min:1',
-            'tools.*.denda_per_hari' => 'required|numeric|min:0',
-        ]);
-
         DB::beginTransaction();
 
         try {
-            foreach ($validated['tools'] as $toolId => $data) {
-                Tool::whereKey($toolId)->update([
-                    'denda_per_hari' => $data['denda_per_hari'],
+            // Mode simpan per-card (single tool).
+            if ($request->filled('tool_id')) {
+                $validated = $request->validate([
+                    'tool_id' => 'required|integer|exists:tools,id',
+                    'denda_per_hari' => 'required|numeric|min:0',
                 ]);
+
+                Tool::whereKey($validated['tool_id'])->update([
+                    'denda_per_hari' => $validated['denda_per_hari'],
+                ]);
+            } else {
+                // Tetap kompatibel dengan mode simpan massal.
+                $validated = $request->validate([
+                    'tools' => 'required|array|min:1',
+                    'tools.*.denda_per_hari' => 'required|numeric|min:0',
+                ]);
+
+                foreach ($validated['tools'] as $toolId => $data) {
+                    Tool::whereKey($toolId)->update([
+                        'denda_per_hari' => $data['denda_per_hari'],
+                    ]);
+                }
             }
 
             ActivityLog::createLog(
@@ -89,7 +102,7 @@ class DendaSettingController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.denda.index')
+            return redirect()->route('admin.denda.index', ['page' => $request->input('page', 1)])
                 ->with('success', 'Pengaturan denda berhasil disimpan.');
         } catch (\Throwable $e) {
             DB::rollBack();
