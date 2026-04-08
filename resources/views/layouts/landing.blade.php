@@ -7,7 +7,7 @@
     <title>@yield('title', 'Sistem Peminjaman Alat')</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script type="module" src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
@@ -24,7 +24,7 @@
                         "landing-border": "#2852A0"
                     },
                     fontFamily: {
-                        "display": ["Space Grotesk", "sans-serif"]
+                        "display": ["Poppins", "sans-serif"]
                     },
                 },
             },
@@ -36,7 +36,7 @@
         }
 
         body {
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #F8FAFC;
         }
 
@@ -146,7 +146,7 @@
 
     <!-- Navigation -->
     <nav
-        class="sticky top-0 bg-landing-bg w-full z-50 py-4 px-6 md:px-12 flex items-center justify-between text-white border-b border-landing-border/50 shadow-md">
+        class="sticky top-0 bg-transparent w-full z-50 py-4 px-6 md:px-12 flex items-center justify-between text-white border-b border-transparent shadow-md">
         <div class="flex items-center gap-2">
             <!-- Logo Icon Box -->
             <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center">
@@ -167,7 +167,12 @@
 
         <div>
             @if(auth()->check())
-                <a href="/"
+                @php
+                    $dashboardRoute = auth()->user()->isAdmin()
+                        ? route('admin.dashboard')
+                        : (auth()->user()->isPetugas() ? route('petugas.dashboard') : route('peminjam.dashboard'));
+                @endphp
+                <a href="{{ $dashboardRoute }}"
                     class="bg-landing-primary hover:bg-landing-primary/90 text-white px-5 py-2.5 rounded text-sm font-semibold transition border border-white/10 shadow-sm flex items-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">dashboard</span> Dashboard
                 </a>
@@ -185,7 +190,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-[#0B1426] text-white/70 py-12 px-6 md:px-12 mt-12 border-t border-white/5">
+    <footer class="relative z-50 bg-[#0B1426] text-white/70 py-12 px-6 md:px-12 mt-0 border-t border-white/5">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
             <div class="space-y-4">
                 <div class="flex items-center gap-2 text-white">

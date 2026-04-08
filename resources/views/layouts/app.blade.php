@@ -235,8 +235,13 @@
                 class="sidebar-texture fixed lg:static inset-y-0 left-0 z-[60] w-64 border-r border-gray-200 dark:border-white/5 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
                 <div class="flex flex-col h-full">
                     <!-- Logo -->
+                    @php
+                        $dashboardRoute = auth()->user()->isAdmin()
+                            ? route('admin.dashboard')
+                            : (auth()->user()->isPetugas() ? route('petugas.dashboard') : route('peminjam.dashboard'));
+                    @endphp
                     <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-white/5">
-                        <a href="/" class="flex items-center gap-2">
+                        <a href="{{ $dashboardRoute }}" class="flex items-center gap-2">
                             <div class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center">
                                 <span class="material-symbols-outlined text-[18px] text-primary">science</span>
                             </div>

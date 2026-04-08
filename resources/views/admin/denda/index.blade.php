@@ -34,46 +34,38 @@
         @foreach($tools as $tool)
             <x-card class="industrial-border" :padding="false">
                 <form method="POST" action="{{ route('admin.denda.update') }}"
-                    class="p-4 md:p-5 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:items-center">
+                    class="p-3 md:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                     @csrf
                     <input type="hidden" name="tool_id" value="{{ $tool->id }}">
                     <input type="hidden" name="page" value="{{ $tools->currentPage() }}">
 
-                    <div class="w-full lg:w-44 xl:w-56 flex-shrink-0">
-                        <div
-                            class="aspect-[4/3] rounded-lg bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 overflow-hidden">
-                            @if($tool->gambar)
-                                <img src="{{ asset($tool->gambar) }}" alt="{{ $tool->nama_alat }}"
-                                    class="w-full h-full object-cover object-center">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-gray-400">
-                                    <span class="material-symbols-outlined text-[48px]">construction</span>
-                                </div>
-                            @endif
-                        </div>
+                    <div
+                        class="w-14 h-14 rounded-lg bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 overflow-hidden flex-shrink-0">
+                        @if($tool->gambar)
+                            <img src="{{ asset($tool->gambar) }}" alt="{{ $tool->nama_alat }}"
+                                class="w-full h-full object-cover object-center">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                <span class="material-symbols-outlined text-[28px]">construction</span>
+                            </div>
+                        @endif
                     </div>
 
-                    <div class="flex-1 min-w-0 space-y-3">
+                    <div class="flex-1 min-w-0">
                         <div>
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">{{ $tool->nama_alat }}
+                            <h3 class="text-sm md:text-base font-bold text-gray-900 dark:text-white leading-tight truncate">
+                                {{ $tool->nama_alat }}
                             </h3>
-                            <p class="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 mt-1">
-                                {{ $tool->category->nama_kategori ?? '-' }}
+                            <p class="text-[11px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mt-1 truncate">
+                                {{ $tool->category->nama_kategori ?? '-' }} • Stok {{ $tool->stok_total }}
                             </p>
                         </div>
-
-                        <div
-                            class="inline-flex items-center gap-2 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-3 py-2">
-                            <span
-                                class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Stok</span>
-                            <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $tool->stok_total }}</span>
-                        </div>
                     </div>
 
-                    <div class="w-full lg:w-72 xl:w-80 space-y-3">
-                        <div class="space-y-2">
+                    <div class="w-full sm:w-auto flex items-end gap-2">
+                        <div class="space-y-1 w-full sm:w-44">
                             <label for="denda_{{ $tool->id }}"
-                                class="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Denda
+                                class="block text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Denda
                                 / Hari</label>
                             <input id="denda_{{ $tool->id }}" type="number" name="denda_per_hari" data-denda-input
                                 data-tool-id="{{ $tool->id }}"
@@ -82,7 +74,7 @@
                         </div>
 
                         <button type="submit"
-                            class="w-full px-4 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                            class="px-4 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 whitespace-nowrap">
                             <span class="material-symbols-outlined text-[18px]">save</span>
                             Simpan Denda
                         </button>
