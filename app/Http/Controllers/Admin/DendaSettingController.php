@@ -25,8 +25,6 @@ class DendaSettingController extends Controller
      */
     public function export()
     {
-        $tools = Tool::with('category')->orderBy('nama_alat')->get();
-
         $filename = 'pengaturan_denda_' . date('Y-m-d_His') . '.csv';
 
         $headers = [
@@ -37,7 +35,7 @@ class DendaSettingController extends Controller
             'Expires' => '0',
         ];
 
-        $callback = function () use ($tools) {
+        $callback = function () {
             $file = fopen('php://output', 'w');
 
             // UTF-8 BOM agar karakter tampil benar di Excel.
@@ -46,15 +44,21 @@ class DendaSettingController extends Controller
 
             fputcsv($file, ['ID Alat', 'Nama Alat', 'Kategori', 'Stok Total', 'Denda per Hari']);
 
-            foreach ($tools as $tool) {
-                fputcsv($file, [
-                    $tool->id,
-                    $tool->nama_alat,
-                    $tool->category->nama_kategori ?? '-',
-                    $tool->stok_total,
-                    $tool->denda_per_hari ?? 5000,
-                ]);
-            }
+            Tool::query()
+                ->with(['category:id,nama_kategori'])
+                ->select(['id', 'nama_alat', 'kategori_id', 'stok', 'stok_rusak', 'stok_perbaikan', 'denda_per_hari'])
+                ->orderBy('id')
+                ->chunkById(500, function ($tools) use ($file) {
+                    foreach ($tools as $tool) {
+                        fputcsv($file, [
+                            $tool->id,
+                            $tool->nama_alat,
+                            $tool->category->nama_kategori ?? '-',
+                            $tool->stok_total,
+                            $tool->denda_per_hari ?? 5000,
+                        ]);
+                    }
+                });
 
             fclose($file);
         };

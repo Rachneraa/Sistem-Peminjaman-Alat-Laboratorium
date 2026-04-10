@@ -145,8 +145,8 @@
     </div>
 
     <!-- Navigation -->
-    <nav
-        class="sticky top-0 bg-transparent w-full z-50 py-4 px-6 md:px-12 flex items-center justify-between text-white border-b border-transparent shadow-md">
+    <nav class="sticky top-0 w-full z-50 py-4 px-6 md:px-12 flex items-center justify-between text-white/90 border-b border-white/10 shadow-md backdrop-blur-md"
+        style="background: rgba(0, 0, 0, 0.28);">
         <div class="flex items-center gap-2">
             <!-- Logo Icon Box -->
             <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center">
@@ -177,7 +177,7 @@
                     <span class="material-symbols-outlined text-[18px]">dashboard</span> Dashboard
                 </a>
             @else
-                <a href="{{ route('login') }}"
+                <a href="{{ route('login') }}" target="_blank" rel="noopener noreferrer"
                     class="bg-landing-primary hover:bg-landing-primary/90 text-white px-5 py-2.5 rounded text-sm font-semibold transition border border-white/10 shadow-sm flex items-center gap-2">
                     Login <span class="material-symbols-outlined text-[18px]">login</span>
                 </a>

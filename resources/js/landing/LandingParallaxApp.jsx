@@ -22,7 +22,7 @@ export default function LandingParallaxApp({
     const heroStats = useMemo(
         () => [
             { label: 'Total Alat', value: totalTools, sub: 'Tercatat di laboratorium' },
-            { label: 'Siap Dipinjam', value: availableTools, sub: 'Status aktif saat ini' },
+            { label: 'Siap Dipinjam', value: availableTools, sub: 'Siap untuk dipinjam' },
         ],
         [totalTools, availableTools]
     );
@@ -164,21 +164,20 @@ export default function LandingParallaxApp({
 
                 <div className="lp-hero-panel">
                     <div className="lp-hero-content">
-                        <p className="lp-kicker">LABORATORY EQUIPMENT PLATFORM</p>
+                        <p className="lp-kicker">Universitas Indonesia | MIPA</p>
                         <h1>
                             Peminjaman Alat Lab
-                            <span> Cinematic. Cepat. Terintegrasi.</span>
+                            <span> Terpercaya. Mudah & Cepat</span>
                         </h1>
                         <p>
-                            Eksplor alat dengan pengalaman parallax scroll yang immersive, lalu ajukan pinjaman dalam
-                            alur yang sederhana.
+                            Platform peminjaman alat laboratorium yang dirancang untuk mempercepat riset kamu. Jelajahi katalog alat, ajukan jadwal, dan pantau status peminjaman dengan mudah dalam satu aplikasi terpadu. Tentu saja biaya peminjaman.
                         </p>
                         <div className="lp-cta-row">
                             <a href={toolsUrl} className="lp-btn lp-btn-primary">
                                 Lihat Alat
                             </a>
                             <a href={stepsAnchor} className="lp-btn lp-btn-outline">
-                                Alur Peminjaman
+                                Pinjam Sekarang
                             </a>
                         </div>
 
@@ -225,7 +224,7 @@ export default function LandingParallaxApp({
                     <div className="lp-container lp-reveal">
                         <h2>Alat Unggulan</h2>
                         <a href={toolsUrl} className="lp-link-more">
-                            Jelajahi seluruh katalog
+                            Yu, cari alat yang kamu butuhkan! →
                         </a>
                     </div>
                     <div className="lp-container lp-cards-grid">

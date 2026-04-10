@@ -84,13 +84,18 @@ class BorrowingController extends Controller
                 'status' => 'menunggu',
             ]);
 
-            // Buat detail peminjaman
+            // Buat detail peminjaman dan kurangi stok
             foreach ($validated['tools'] as $item) {
                 BorrowingDetail::create([
                     'borrowing_id' => $borrowing->id,
                     'tool_id' => $item['tool_id'],
                     'jumlah' => $item['jumlah'],
                 ]);
+
+                // Kurangi stok barang karena status peminjaman adalah "menunggu"
+                $tool = Tool::find($item['tool_id']);
+                $tool->decrement('stok', $item['jumlah']);
+                $tool->updateStatusFromStock();
             }
 
             ActivityLog::createLog(

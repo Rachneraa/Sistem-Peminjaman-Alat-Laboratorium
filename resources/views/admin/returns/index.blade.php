@@ -94,9 +94,17 @@
                             @php
                                 $totalDenda = $return->denda + ($return->denda_kerusakan ?? 0);
                             @endphp
-                            <x-badge :type="$totalDenda > 0 ? 'danger' : 'success'" size="md">
-                                Rp{{ number_format($totalDenda, 0, ',', '.') }}
-                            </x-badge>
+                            <div class="space-y-1">
+                                <x-badge :type="$totalDenda > 0 ? 'danger' : 'success'" size="md">
+                                    Rp{{ number_format($totalDenda, 0, ',', '.') }}
+                                </x-badge>
+                                @if($return->denda_diabaikan)
+                                    <div class="text-[10px] text-yellow-500 font-bold uppercase tracking-wider">Denda terlambat diabaikan</div>
+                                    @if($return->alasan_abaikan_denda)
+                                        <div class="text-[10px] text-gray-500 dark:text-gray-400 max-w-[220px] truncate" title="{{ $return->alasan_abaikan_denda }}">Alasan: {{ $return->alasan_abaikan_denda }}</div>
+                                    @endif
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex justify-end gap-1">

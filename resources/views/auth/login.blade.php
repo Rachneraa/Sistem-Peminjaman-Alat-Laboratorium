@@ -222,20 +222,39 @@
                 });
             });
 
-           @if (session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: '{{ session('success') }}',
-                confirmButtonColor: '#0d5868',
-            });
-        @endif
+            // Move to next field or submit on Enter key
+            const form = document.querySelector('form');
+            if (form) {
+                const emailInput = form.querySelector('input[name="email"]');
+                const passwordInput = form.querySelector('input[name="password"]');
+                const inputs = Array.from(form.querySelectorAll('input[type="email"], input[type="password"], input[type="checkbox"], button[type="submit"]'));
 
-            @if ($errors->any())
+                inputs.forEach(function (input, index) {
+                    input.addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter' && input.type !== 'checkbox') {
+                            e.preventDefault();
+
+                            // Check if email and password are both filled
+                            if (emailInput && passwordInput && emailInput.value.trim() && passwordInput.value.trim()) {
+                                // Both fields filled - submit form
+                                form.submit();
+                            } else {
+                                // Not all filled - move to next field
+                                const nextInput = inputs[index + 1];
+                                if (nextInput) {
+                                    nextInput.focus();
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+
+            @if (session('success'))
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: '{{ $errors->first() }}',
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: '{{ session('success') }}',
                     confirmButtonColor: '#0d5868',
                 });
             @endif

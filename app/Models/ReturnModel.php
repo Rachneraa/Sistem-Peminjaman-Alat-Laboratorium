@@ -21,8 +21,11 @@ class ReturnModel extends Model
         'borrowing_id',
         'tanggal_kembali',
         'denda',
+        'denda_keterlambatan_awal',
         'terlambat_hari',
         'denda_kerusakan',
+        'denda_diabaikan',
+        'alasan_abaikan_denda',
         'keterangan',
     ];
 
@@ -34,7 +37,9 @@ class ReturnModel extends Model
         return [
             'tanggal_kembali' => 'date',
             'denda' => 'decimal:2',
+            'denda_keterlambatan_awal' => 'decimal:2',
             'denda_kerusakan' => 'decimal:2',
+            'denda_diabaikan' => 'boolean',
         ];
     }
 

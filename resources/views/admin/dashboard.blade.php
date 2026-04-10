@@ -10,7 +10,7 @@
         </div>
         <form id="database-export-form" method="POST" action="{{ route('admin.database.export') }}">
             @csrf
-            <button type="submit"
+            <button type="submit" id="database-export-btn"
                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary hover:text-primary hover:bg-primary/5 transition">
                 <span class="material-symbols-outlined text-[18px]">database</span>
                 Export Database (.sql)
@@ -276,10 +276,44 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        async function downloadAndRefresh(url, options = {}) {
+            const response = await fetch(url, {
+                method: options.method || 'GET',
+                headers: options.headers || {},
+                body: options.body || null,
+                credentials: options.credentials || 'include',
+                redirect: 'follow',
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                throw new Error('Export gagal diproses.');
+            }
+
+            const blob = await response.blob();
+            const contentDisposition = response.headers.get('Content-Disposition') || '';
+            const utf8NameMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+            const quotedNameMatch = contentDisposition.match(/filename="([^"]+)"/i);
+            const plainNameMatch = contentDisposition.match(/filename=([^;]+)/i);
+            const filename = utf8NameMatch ? decodeURIComponent(utf8NameMatch[1]) : (quotedNameMatch ? quotedNameMatch[1] : (plainNameMatch ? plainNameMatch[1].trim() : 'database_backup.sql'));
+
+            const blobUrl = window.URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = blobUrl;
+            anchor.download = filename;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            window.URL.revokeObjectURL(blobUrl);
+
+            window.location.reload();
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const dbExportForm = document.getElementById('database-export-form');
+            const dbExportButton = document.getElementById('database-export-btn');
             if (dbExportForm) {
-                dbExportForm.addEventListener('submit', function (event) {
+                dbExportForm.addEventListener('submit', async function (event) {
                     event.preventDefault();
 
                     Swal.fire({
@@ -292,7 +326,29 @@
                         confirmButtonColor: '#2563EB'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            dbExportForm.submit();
+                            if (dbExportButton) {
+                                dbExportButton.disabled = true;
+                                dbExportButton.classList.add('opacity-70', 'cursor-not-allowed');
+                                dbExportButton.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span> Menyiapkan backup database...';
+                            }
+
+                            downloadAndRefresh(dbExportForm.action, {
+                                method: 'POST',
+                                body: new FormData(dbExportForm),
+                            }).catch(function (error) {
+                                if (dbExportButton) {
+                                    dbExportButton.disabled = false;
+                                    dbExportButton.classList.remove('opacity-70', 'cursor-not-allowed');
+                                    dbExportButton.innerHTML = '<span class="material-symbols-outlined text-[18px]">database</span> Export Database (.sql)';
+                                }
+
+                                Swal.fire({
+                                    title: 'Export gagal',
+                                    text: error.message,
+                                    icon: 'error',
+                                    confirmButtonColor: '#dc2626'
+                                });
+                            });
                         }
                     });
                 });

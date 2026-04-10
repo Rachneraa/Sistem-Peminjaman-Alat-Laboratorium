@@ -7,7 +7,7 @@
     @php
         $landingReactProps = [
             'totalTools' => $totalTools,
-            'availableTools' => $totalTools,
+            'availableTools' => $availableTools,
             'toolsUrl' => route('landing.tools'),
             'stepsAnchor' => '#cara-peminjaman',
             'latestTools' => $latestTools->map(function ($tool) {

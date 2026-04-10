@@ -35,7 +35,8 @@
 <body>
     <h1>Laporan Pengembalian Alat</h1>
     <p>Periode Input: {{ \Carbon\Carbon::parse($display_start_date)->format('d/m/Y') }} -
-        {{ \Carbon\Carbon::parse($display_end_date)->format('d/m/Y') }}</p>
+        {{ \Carbon\Carbon::parse($display_end_date)->format('d/m/Y') }}
+    </p>
     <p>Urutan Data: {{ $orderDirection === 'desc' ? 'Mundur (terbaru ke terlama)' : 'Maju (terlama ke terbaru)' }}</p>
 
     <table>
@@ -47,6 +48,7 @@
                 <th>Alat</th>
                 <th>Denda Keterlambatan</th>
                 <th>Denda Kerusakan</th>
+                <th>Status Denda</th>
                 <th>Total Denda</th>
             </tr>
         </thead>
@@ -64,6 +66,14 @@
                     <td>Rp {{ number_format($return->denda, 0, ',', '.') }}</td>
                     <td>Rp {{ number_format($return->denda_kerusakan ?? 0, 0, ',', '.') }}</td>
                     <td>
+                        @if($return->denda_diabaikan)
+                            <strong>DIABAIKAN</strong><br>
+                            <small>{{ $return->alasan_abaikan_denda ?: '-' }}</small>
+                        @else
+                            NORMAL
+                        @endif
+                    </td>
+                    <td>
                         @php
                             $totalDenda = $return->denda + ($return->denda_kerusakan ?? 0);
                         @endphp
@@ -79,15 +89,15 @@
                 $totalKeseluruhan = $totalDendaKeterlambatan + $totalDendaKerusakan;
             @endphp
             <tr style="border-top: 2px solid #999;">
-                <td colspan="6" style="text-align: right; font-weight: bold;">Total Denda Keterlambatan:</td>
+                <td colspan="7" style="text-align: right; font-weight: bold;">Total Denda Keterlambatan:</td>
                 <td style="font-weight: bold;">Rp {{ number_format($totalDendaKeterlambatan, 0, ',', '.') }}</td>
             </tr>
             <tr>
-                <td colspan="6" style="text-align: right; font-weight: bold;">Total Denda Kerusakan:</td>
+                <td colspan="7" style="text-align: right; font-weight: bold;">Total Denda Kerusakan:</td>
                 <td style="font-weight: bold;">Rp {{ number_format($totalDendaKerusakan, 0, ',', '.') }}</td>
             </tr>
             <tr style="border-top: 2px solid #333;">
-                <td colspan="6" style="text-align: right; font-weight: bold; font-size: 14px;">TOTAL KESELURUHAN:</td>
+                <td colspan="7" style="text-align: right; font-weight: bold; font-size: 14px;">TOTAL KESELURUHAN:</td>
                 <td style="font-weight: bold; font-size: 14px;">Rp {{ number_format($totalKeseluruhan, 0, ',', '.') }}
                 </td>
             </tr>

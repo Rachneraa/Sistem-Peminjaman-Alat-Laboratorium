@@ -3,13 +3,16 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         // Trigger untuk log aktivitas setelah insert borrowing
         DB::unprepared("
             CREATE TRIGGER log_aktivitas_borrowing_insert
@@ -95,6 +98,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         DB::unprepared('DROP TRIGGER IF EXISTS log_aktivitas_borrowing_insert');
         DB::unprepared('DROP TRIGGER IF EXISTS log_aktivitas_borrowing_update');
         DB::unprepared('DROP TRIGGER IF EXISTS update_stok_after_borrowing_detail');

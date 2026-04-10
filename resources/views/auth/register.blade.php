@@ -224,6 +224,38 @@
                     toggleButton.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
                 });
             });
+
+            // Move to next field or submit on Enter key
+            const form = document.querySelector('form');
+            if (form) {
+                const nameInput = form.querySelector('input[name="name"]');
+                const emailInput = form.querySelector('input[name="email"]');
+                const passwordInput = form.querySelector('input[name="password"]');
+                const confirmPasswordInput = form.querySelector('input[name="password_confirmation"]');
+                const inputs = Array.from(form.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="checkbox"], button[type="submit"]'));
+
+                inputs.forEach(function (input, index) {
+                    input.addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter' && input.type !== 'checkbox') {
+                            e.preventDefault();
+
+                            // Check if all required fields are filled
+                            if (nameInput && emailInput && passwordInput && confirmPasswordInput &&
+                                nameInput.value.trim() && emailInput.value.trim() &&
+                                passwordInput.value.trim() && confirmPasswordInput.value.trim()) {
+                                // All fields filled - submit form
+                                form.submit();
+                            } else {
+                                // Not all filled - move to next field
+                                const nextInput = inputs[index + 1];
+                                if (nextInput) {
+                                    nextInput.focus();
+                                }
+                            }
+                        }
+                    });
+                });
+            }
         });
     </script>
 </body>

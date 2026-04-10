@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Tool;
+use App\Models\Category;
+use App\Models\BorrowingDetail;
 
 class LandingController extends Controller
 {
@@ -12,34 +14,74 @@ class LandingController extends Controller
      */
     public function index()
     {
-        // 1. Total Alat (Total of available stock)
-        $totalTools = Tool::sum('stok');
+        // 1. Alat siap dipinjam (stok yang masih tersedia)
+        $availableTools = Tool::sum('stok');
 
-        // 2. Alat Terbaru (Latest 3 added)
+        // 2. Alat yang sedang dipinjam atau masih menunggu proses
+        $borrowedTools = BorrowingDetail::whereHas('borrowing', function ($query) {
+            $query->whereIn('status', ['menunggu', 'disetujui', 'menunggu_pengembalian']);
+        })->sum('jumlah');
+
+        // 3. Total alat fisik tetap stabil: tersedia + sedang dipinjam + rusak + perbaikan
+        $toolStockTotals = Tool::selectRaw('COALESCE(SUM(stok_rusak + stok_perbaikan), 0) as total')
+            ->value('total');
+
+        $totalTools = $availableTools + $borrowedTools + $toolStockTotals;
+
+        // 4. Alat Terbaru (Latest 3 added)
         $latestTools = Tool::with('category')->latest()->take(3)->get();
 
-        // 3. Alat Unggulan (Top 6 tools with stock > 0, sorted by stock lowest to highest)
+        // 5. Alat Unggulan (Top 6 tools with stock > 0, sorted by stock lowest to highest)
         $featuredTools = Tool::with('category')
             ->where('stok', '>', 0)
             ->orderBy('stok', 'asc')
             ->take(6)
             ->get();
 
-        return view('landing.index', compact('totalTools', 'latestTools', 'featuredTools'));
+        return view('landing.index', compact('totalTools', 'availableTools', 'latestTools', 'featuredTools'));
     }
 
     /**
      * Tampilkan semua alat untuk halaman publik
      */
-    public function tools()
+    public function tools(Request $request)
     {
-        // View All Tools with pagination
-        $tools = Tool::with('category')
-            ->where('stok', '>', 0)
-            ->orderBy('stok', 'asc')
-            ->paginate(10);
+        $search = $request->query('search');
+        $categoryId = $request->query('category');
+        $sort = $request->query('sort', 'default');
 
-        return view('landing.tools', compact('tools'));
+        $toolsQuery = Tool::with('category');
+
+        if ($search) {
+            $toolsQuery->where('nama_alat', 'like', '%' . $search . '%');
+        }
+
+        if ($categoryId) {
+            $toolsQuery->where('category_id', $categoryId);
+        }
+
+        switch ($sort) {
+            case 'name-asc':
+                $toolsQuery->orderBy('nama_alat', 'asc');
+                break;
+            case 'stock-high':
+                $toolsQuery->orderBy('stok', 'desc');
+                break;
+            case 'available':
+                $toolsQuery->orderBy('stok', 'desc');
+                break;
+            default:
+                $toolsQuery->orderBy('stok', 'asc');
+                break;
+        }
+
+        // View All Tools with pagination
+        $tools = $toolsQuery->paginate(9)->withQueryString();
+
+        // Get all categories
+        $categories = Category::orderBy('nama_kategori')->get();
+
+        return view('landing.tools', compact('tools', 'categories', 'search', 'categoryId', 'sort'));
     }
 
     /**

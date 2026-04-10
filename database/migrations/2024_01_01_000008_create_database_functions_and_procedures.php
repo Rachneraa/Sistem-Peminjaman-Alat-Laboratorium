@@ -3,13 +3,16 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         // Function untuk menghitung denda
         DB::unprepared("
             CREATE FUNCTION hitung_denda(
@@ -119,6 +122,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         DB::unprepared('DROP FUNCTION IF EXISTS hitung_denda');
         DB::unprepared('DROP PROCEDURE IF EXISTS update_stok_setelah_peminjaman');
         DB::unprepared('DROP PROCEDURE IF EXISTS update_stok_setelah_pengembalian');

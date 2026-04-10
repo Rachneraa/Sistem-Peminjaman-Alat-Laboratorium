@@ -28,9 +28,9 @@ class BorrowingController extends Controller
         // Search by user name
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('user', function($q) use ($search) {
+            $query->whereHas('user', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -79,8 +79,8 @@ class BorrowingController extends Controller
 
         DB::beginTransaction();
         try {
-            // Cek stok tersedia jika status disetujui
-            if ($validated['status'] === 'disetujui') {
+            // Cek stok tersedia jika status menunggu atau disetujui
+            if (in_array($validated['status'], ['menunggu', 'disetujui'])) {
                 foreach ($validated['tools'] as $item) {
                     $tool = Tool::find($item['tool_id']);
                     if (!$tool->isAvailable($item['jumlah'])) {
@@ -109,8 +109,8 @@ class BorrowingController extends Controller
                 ]);
             }
 
-            // Jika status disetujui, kurangi stok
-            if ($validated['status'] === 'disetujui') {
+            // Jika status menunggu atau disetujui, kurangi stok
+            if (in_array($validated['status'], ['menunggu', 'disetujui'])) {
                 foreach ($borrowing->borrowingDetails as $detail) {
                     $tool = Tool::find($detail->tool_id);
                     $tool->decrement('stok', $detail->jumlah);
@@ -166,8 +166,8 @@ class BorrowingController extends Controller
             $oldStatus = $borrowing->status;
             $newStatus = $validated['status'];
 
-            // Kembalikan stok jika sebelumnya disetujui
-            if ($oldStatus === 'disetujui' && $newStatus !== 'disetujui') {
+            // Kembalikan stok jika sebelumnya menunggu atau disetujui
+            if (in_array($oldStatus, ['menunggu', 'disetujui']) && !in_array($newStatus, ['menunggu', 'disetujui'])) {
                 foreach ($borrowing->borrowingDetails as $detail) {
                     $tool = Tool::find($detail->tool_id);
                     $tool->increment('stok', $detail->jumlah);
@@ -200,8 +200,8 @@ class BorrowingController extends Controller
             // Refresh relasi
             $borrowing->load('borrowingDetails');
 
-            // Jika status baru disetujui, kurangi stok
-            if ($newStatus === 'disetujui') {
+            // Jika status baru menunggu atau disetujui, kurangi stok
+            if (in_array($newStatus, ['menunggu', 'disetujui'])) {
                 // Cek stok tersedia
                 foreach ($validated['tools'] as $item) {
                     $tool = Tool::find($item['tool_id']);
@@ -243,8 +243,8 @@ class BorrowingController extends Controller
     {
         DB::beginTransaction();
         try {
-            // Kembalikan stok alat jika status disetujui
-            if ($borrowing->status === 'disetujui') {
+            // Kembalikan stok alat jika status menunggu atau disetujui
+            if (in_array($borrowing->status, ['menunggu', 'disetujui'])) {
                 foreach ($borrowing->borrowingDetails as $detail) {
                     $tool = $detail->tool;
                     $tool->increment('stok', $detail->jumlah);

@@ -60,7 +60,6 @@ class ToolController extends Controller
             'stok_perbaikan' => 'required|integer|min:0',
             // 'kondisi' => 'required|in:baik,rusak,perlu_perbaikan', // Removed as per request
             'status' => 'required|in:tersedia,dipinjam,rusak,perbaikan',
-            'deskripsi' => 'nullable|string',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -124,7 +123,6 @@ class ToolController extends Controller
             'stok_perbaikan' => 'required|integer|min:0',
             //'kondisi' => 'required|in:baik,rusak,perlu_perbaikan',
             'status' => 'required|in:tersedia,dipinjam,rusak,perbaikan',
-            'deskripsi' => 'nullable|string',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -159,12 +157,12 @@ class ToolController extends Controller
     public function destroy(Tool $tool)
     {
         $name = $tool->nama_alat;
-        
+
         // Hapus gambar jika ada
         if ($tool->gambar && file_exists(public_path($tool->gambar))) {
             unlink(public_path($tool->gambar));
         }
-        
+
         $tool->delete();
 
         ActivityLog::createLog(

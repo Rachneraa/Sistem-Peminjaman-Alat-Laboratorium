@@ -56,6 +56,8 @@ class ReturnController extends Controller
         $validated = $request->validate([
             'tanggal_kembali' => 'required|date',
             'denda_kerusakan' => 'nullable|numeric|min:0',
+            'abaikan_denda' => 'nullable|boolean',
+            'alasan_abaikan_denda' => 'nullable|required_if:abaikan_denda,1|string|min:8',
             'keterangan' => 'nullable|string',
         ]);
 
@@ -68,6 +70,10 @@ class ReturnController extends Controller
             // Denda dihitung dari tanggal selesai, bukan jatuh tempo
             $dendaPerHari = $borrowing->calculateDendaPerHariTotal();
             $dendaData = DendaHelper::hitungDenda($tanggal_kembali, $tanggal_selesai, $dendaPerHari);
+            $dendaKeterlambatanAwal = (float) $dendaData['denda'];
+            $abaikanDenda = $request->boolean('abaikan_denda');
+            $alasanAbaikanDenda = $abaikanDenda ? trim((string) ($validated['alasan_abaikan_denda'] ?? '')) : null;
+            $dendaKeterlambatanFinal = $abaikanDenda ? 0 : $dendaKeterlambatanAwal;
 
             // Denda kerusakan dari input petugas
             $dendaKerusakan = $validated['denda_kerusakan'] ?? 0;
@@ -83,9 +89,12 @@ class ReturnController extends Controller
             $return = ReturnModel::create([
                 'borrowing_id' => $borrowing->id,
                 'tanggal_kembali' => $tanggal_kembali->format('Y-m-d'),
-                'denda' => $dendaData['denda'],
+                'denda' => $dendaKeterlambatanFinal,
+                'denda_keterlambatan_awal' => $dendaKeterlambatanAwal,
                 'terlambat_hari' => $dendaData['terlambat_hari'],
                 'denda_kerusakan' => $dendaKerusakan,
+                'denda_diabaikan' => $abaikanDenda,
+                'alasan_abaikan_denda' => $alasanAbaikanDenda,
                 'keterangan' => $validated['keterangan'],
             ]);
 
@@ -102,12 +111,14 @@ class ReturnController extends Controller
             NotificationService::notifyReturnProcessed($return);
 
             DB::commit();
-            $totalDenda = $dendaData['denda'] + $dendaKerusakan;
+            $totalDenda = $dendaKeterlambatanFinal + $dendaKerusakan;
             $message = 'Pengembalian berhasil diproses.';
 
             $dendaDetails = [];
-            if ($dendaData['denda'] > 0) {
-                $dendaDetails[] = 'Keterlambatan: Rp ' . number_format($dendaData['denda'], 0, ',', '.') . ' (' . $dendaData['terlambat_hari'] . ' hari)';
+            if ($dendaKeterlambatanFinal > 0) {
+                $dendaDetails[] = 'Keterlambatan: Rp ' . number_format($dendaKeterlambatanFinal, 0, ',', '.') . ' (' . $dendaData['terlambat_hari'] . ' hari)';
+            } elseif ($abaikanDenda && $dendaKeterlambatanAwal > 0) {
+                $dendaDetails[] = 'Keterlambatan diabaikan: Rp ' . number_format($dendaKeterlambatanAwal, 0, ',', '.');
             }
             if ($dendaKerusakan > 0) {
                 $dendaDetails[] = 'Kerusakan: Rp ' . number_format($dendaKerusakan, 0, ',', '.');

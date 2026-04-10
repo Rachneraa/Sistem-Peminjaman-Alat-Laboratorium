@@ -22,7 +22,7 @@ yarn-error.log
 /.idea
 /.vscode
 .phpunit.cache
-
+/storage/database/*
 
 
 

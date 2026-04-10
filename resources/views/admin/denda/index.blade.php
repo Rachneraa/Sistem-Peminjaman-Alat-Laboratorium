@@ -16,7 +16,7 @@
                 <span class="material-symbols-outlined text-[18px]">save</span>
                 Simpan Semua
             </button>
-            <a href="{{ route('admin.denda.export') }}"
+            <a href="{{ route('admin.denda.export') }}" data-export-link data-loading-text="Menyiapkan export denda..."
                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary hover:text-primary hover:bg-primary/5 transition">
                 <span class="material-symbols-outlined text-[18px]">download</span>
                 Export CSV
@@ -91,11 +91,64 @@
     @endif
 
     <script>
+        async function downloadAndRefresh(url, options = {}) {
+            const response = await fetch(url, {
+                method: options.method || 'GET',
+                headers: options.headers || {},
+                body: options.body || null,
+                credentials: options.credentials || 'include',
+                redirect: 'follow',
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                throw new Error('Export gagal diproses.');
+            }
+
+            const blob = await response.blob();
+            const contentDisposition = response.headers.get('Content-Disposition') || '';
+            const utf8NameMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+            const quotedNameMatch = contentDisposition.match(/filename="([^"]+)"/i);
+            const plainNameMatch = contentDisposition.match(/filename=([^;]+)/i);
+            const filename = utf8NameMatch ? decodeURIComponent(utf8NameMatch[1]) : (quotedNameMatch ? quotedNameMatch[1] : (plainNameMatch ? plainNameMatch[1].trim() : 'export.csv'));
+
+            const blobUrl = window.URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = blobUrl;
+            anchor.download = filename;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            window.URL.revokeObjectURL(blobUrl);
+
+            window.location.reload();
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const saveAllButton = document.getElementById('save-all-denda-btn');
             const bulkForm = document.getElementById('bulk-denda-form');
             const bulkInputs = document.getElementById('bulk-denda-inputs');
             if (!saveAllButton || !bulkForm || !bulkInputs) return;
+
+            document.querySelectorAll('[data-export-link]').forEach(function (link) {
+                link.addEventListener('click', async function (event) {
+                    event.preventDefault();
+
+                    const loadingText = link.getAttribute('data-loading-text') || 'Menyiapkan file...';
+                    link.classList.add('pointer-events-none', 'opacity-70');
+                    link.setAttribute('aria-disabled', 'true');
+                    link.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>' + loadingText;
+
+                    try {
+                        await downloadAndRefresh(link.href);
+                    } catch (error) {
+                        link.classList.remove('pointer-events-none', 'opacity-70');
+                        link.removeAttribute('aria-disabled');
+                        link.innerHTML = '<span class="material-symbols-outlined text-[18px]">download</span>Export CSV';
+                        alert(error.message);
+                    }
+                });
+            });
 
             saveAllButton.addEventListener('click', function () {
                 const dendaInputs = document.querySelectorAll('[data-denda-input][data-tool-id]');

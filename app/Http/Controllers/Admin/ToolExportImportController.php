@@ -15,10 +15,8 @@ class ToolExportImportController extends Controller
      */
     public function export()
     {
-        $tools = Tool::with('category')->get();
-        
         $filename = 'tools_' . date('Y-m-d_His') . '.csv';
-        
+
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
@@ -26,38 +24,44 @@ class ToolExportImportController extends Controller
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0',
         ];
-        
-        $callback = function() use ($tools) {
+
+        $callback = function () {
             $file = fopen('php://output', 'w');
-            
+
             // Add UTF-8 BOM for Excel compatibility
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
             // Add separator hint for Excel
             fwrite($file, "sep=,\n");
-            
+
             // Header row
-            fputcsv($file, ['ID', 'Nama Alat', 'Kategori', 'Stok Total', 'Stok Tersedia', 'Status', 'Keterangan']);
-            
-            // Data rows
-            foreach ($tools as $tool) {
-                fputcsv($file, [
-                    $tool->id,
-                    $tool->nama_alat,
-                    $tool->category->nama_kategori,
-                    $tool->stok,
-                    $tool->stok_tersedia,
-                    ucfirst($tool->status),
-                    $tool->keterangan ?? '-'
-                ]);
-            }
-            
+            fputcsv($file, ['ID', 'Nama Alat', 'Kategori', 'Stok Total', 'Stok Tersedia', 'Status', 'Deskripsi']);
+
+            // Stream rows per chunk to reduce memory usage.
+            Tool::query()
+                ->with(['category:id,nama_kategori'])
+                ->select(['id', 'nama_alat', 'kategori_id', 'stok', 'stok_rusak', 'stok_perbaikan', 'status', 'deskripsi'])
+                ->orderBy('id')
+                ->chunkById(500, function ($tools) use ($file) {
+                    foreach ($tools as $tool) {
+                        fputcsv($file, [
+                            $tool->id,
+                            $tool->nama_alat,
+                            $tool->category->nama_kategori ?? '-',
+                            $tool->stok_total,
+                            $tool->stok_tersedia,
+                            ucfirst($tool->status),
+                            $tool->deskripsi ?? '-',
+                        ]);
+                    }
+                });
+
             fclose($file);
         };
-        
+
         return response()->stream($callback, 200, $headers);
     }
-    
+
     /**
      * Import tools from CSV
      */
@@ -66,27 +70,27 @@ class ToolExportImportController extends Controller
         $request->validate([
             'file' => 'required|mimes:csv,txt|max:2048'
         ]);
-        
+
         $file = $request->file('file');
         $file = $request->file('file');
-        
+
         // Detect delimiter
         $handle = fopen($file->getRealPath(), 'r');
         $preview = fread($handle, 1000);
         $delimiter = substr_count($preview, ';') > substr_count($preview, ',') ? ';' : ',';
         fclose($handle);
-        
+
         $handle = fopen($file->getRealPath(), 'r');
-        
+
         // Skip UTF-8 BOM if present
         $bom = fread($handle, 3);
         if ($bom !== "\xEF\xBB\xBF") {
             rewind($handle);
         }
-        
+
         // Read first line - could be sep=, or header
         $firstLine = fgets($handle);
-        
+
         // Skip sep=, line if present
         if (strpos($firstLine, 'sep=') === 0) {
             // Read actual header
@@ -97,38 +101,38 @@ class ToolExportImportController extends Controller
         // But since we want to skip header anyway:
         // Case 1: sep= line exists. fgets read it. header is next. fgetcsv skips header. Pointer at data. OK.
         // Case 2: No sep= line. fgets read header. Pointer at data. OK.
-        
+
         $imported = 0;
         $errors = [];
-        
+
         while (($data = fgetcsv($handle, 0, $delimiter)) !== false) {
             // Skip empty rows
             if (empty(array_filter($data))) {
                 continue;
             }
-            
+
             // Skip comment lines (starting with #)
             if (isset($data[0]) && strpos(trim($data[0]), '#') === 0) {
                 continue;
             }
-            
-            // Check if we have enough columns (need at least 7 columns: ID, Nama, Kategori, Stok, Stok Tersedia, Status, Keterangan)
+
+            // Check if we have enough columns (need at least 6 columns: ID, Nama, Kategori, Stok, Stok Tersedia, Status)
             if (count($data) < 6) {
                 $errors[] = "Baris " . ($data[0] ?? 'unknown') . ": Kolom tidak cukup (minimal 6 kolom)";
                 continue;
             }
-            
-            // Export format: ID, Nama Alat, Kategori, Stok Total, Stok Tersedia, Status, Keterangan
+
+            // Export format: ID, Nama Alat, Kategori, Stok Total, Stok Tersedia, Status, Deskripsi
             // We skip ID (auto-increment) and use the rest
-            
+
             // Find category by name
             $category = Category::where('nama_kategori', $data[2])->first();
-            
+
             if (!$category) {
                 $errors[] = "Baris {$data[0]}: Kategori '{$data[2]}' tidak ditemukan";
                 continue;
             }
-            
+
             // Validate data
             $validator = Validator::make([
                 'nama_alat' => $data[1] ?? null,
@@ -147,12 +151,12 @@ class ToolExportImportController extends Controller
                 'status.required' => 'Status wajib diisi',
                 'status.in' => 'Status tidak valid (pilihan: tersedia, dipinjam, rusak)',
             ]);
-            
+
             if ($validator->fails()) {
                 $errors[] = "Baris {$data[0]}: " . implode(', ', $validator->errors()->all());
                 continue;
             }
-            
+
             // Create tool
             Tool::create([
                 'nama_alat' => $data[1],
@@ -160,14 +164,14 @@ class ToolExportImportController extends Controller
                 'stok' => $data[3],
                 'stok_tersedia' => $data[4] ?? $data[3],
                 'status' => strtolower($data[5]),
-                'keterangan' => $data[6] ?? null,
+                'deskripsi' => $data[6] ?? null,
             ]);
-            
+
             $imported++;
         }
-        
+
         fclose($handle);
-        
+
         // Provide detailed feedback
         if ($imported === 0 && count($errors) > 0) {
             // No data imported and there were errors
@@ -188,14 +192,14 @@ class ToolExportImportController extends Controller
             return redirect()->back()->with('success', "$imported alat berhasil diimpor.");
         }
     }
-    
+
     /**
      * Download template CSV
      */
     public function template()
     {
         $filename = 'template_tools.csv';
-        
+
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
@@ -203,37 +207,37 @@ class ToolExportImportController extends Controller
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
             'Expires' => '0',
         ];
-        
+
         // Get existing categories from database
         $categories = Category::limit(2)->get();
-        
-        $callback = function() use ($categories) {
+
+        $callback = function () use ($categories) {
             $file = fopen('php://output', 'w');
-            
+
             // Add UTF-8 BOM for Excel compatibility
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
             // Add separator hint for Excel
             fwrite($file, "sep=,\n");
-            
+
             // Header - same as export format
-            fputcsv($file, ['ID', 'Nama Alat', 'Kategori', 'Stok Total', 'Stok Tersedia', 'Status', 'Keterangan']);
-            
+            fputcsv($file, ['ID', 'Nama Alat', 'Kategori', 'Stok Total', 'Stok Tersedia', 'Status', 'Deskripsi']);
+
             // Example data using actual categories from database
             if ($categories->count() > 0) {
                 $cat1 = $categories->first()->nama_kategori;
                 $cat2 = $categories->count() > 1 ? $categories->get(1)->nama_kategori : $cat1;
-                
-                fputcsv($file, ['1', 'Contoh Alat 1', $cat1, '10', '10', 'Tersedia', 'Contoh keterangan alat 1']);
-                fputcsv($file, ['2', 'Contoh Alat 2', $cat2, '5', '5', 'Tersedia', 'Contoh keterangan alat 2']);
+
+                fputcsv($file, ['1', 'Contoh Alat 1', $cat1, '10', '10', 'Tersedia', '-']);
+                fputcsv($file, ['2', 'Contoh Alat 2', $cat2, '5', '5', 'Tersedia', '-']);
             } else {
                 // If no categories exist, add placeholder
-                fputcsv($file, ['1', 'Contoh Alat 1', 'BUAT_KATEGORI_DULU', '10', '10', 'Tersedia', 'Silakan buat kategori terlebih dahulu']);
+                fputcsv($file, ['1', 'Contoh Alat 1', 'BUAT_KATEGORI_DULU', '10', '10', 'Tersedia', '-']);
             }
-            
+
             fclose($file);
         };
-        
+
         return response()->stream($callback, 200, $headers);
     }
 }
