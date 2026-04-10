@@ -95,10 +95,14 @@ Sistem mendukung tiga peran pengguna dengan hak akses yang berbeda:
    php artisan serve
    ```
 
-## 📄 Lisensi
+8. Ganti Pw SMTP di .env:
 
-Proyek ini dibuat untuk keperluan **Uji Kompetensi Keahlian (UKK)**. Dilarang menyalahgunakan tanpa izin.
+   ```env
+   MAIL_USERNAME=null
+   MAIL_PASSWORD=null
+   MAIL_ENCRYPTION=null
+   MAIL_FROM_ADDRESS="hello@example.com"
+   ```
 
+9. hihihaha
 ---
-
-Dikembangkan oleh **Restu Prayuga**
