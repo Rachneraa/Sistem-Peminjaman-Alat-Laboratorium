@@ -20,6 +20,11 @@ class Borrowing extends Model
         'tanggal_kembali',
         'jatuh_tempo',
         'status',
+        'jaminan_tipe',
+        'ktp_diterima_at',
+        'ktp_diterima_oleh',
+        'ktp_dikembalikan_at',
+        'ktp_dikembalikan_oleh',
         'keterangan',
     ];
 
@@ -33,6 +38,8 @@ class Borrowing extends Model
             'tanggal_selesai' => 'date',
             'tanggal_kembali' => 'date',
             'jatuh_tempo' => 'date',
+            'ktp_diterima_at' => 'datetime',
+            'ktp_dikembalikan_at' => 'datetime',
         ];
     }
 

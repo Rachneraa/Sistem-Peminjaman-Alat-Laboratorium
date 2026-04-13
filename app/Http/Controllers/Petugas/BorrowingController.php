@@ -23,7 +23,7 @@ class BorrowingController extends Controller
         if ($request->has('status') && $request->status) {
             $query->where('status', $request->status);
         } else {
-            // Default: tampilkan yang menunggu, disetujui, dan menunggu pengembalian (aktif)
+            // Default: tampilkan yang menunggu, disetujui, dan menunggu pengembalian
             $query->whereIn('status', ['menunggu', 'disetujui', 'menunggu_pengembalian']);
         }
 
@@ -44,8 +44,17 @@ class BorrowingController extends Controller
     /**
      * Menyetujui peminjaman
      */
-    public function approve(Borrowing $borrowing)
+    public function approve(Request $request, Borrowing $borrowing)
     {
+        // Fallback untuk request dari form lama yang belum mengirim jaminan_tipe.
+        $request->merge([
+            'jaminan_tipe' => $request->input('jaminan_tipe', 'ktp'),
+        ]);
+
+        $validated = $request->validate([
+            'jaminan_tipe' => 'required|string|in:ktp,sim,kartu_pelajar,lainnya',
+        ]);
+
         DB::beginTransaction();
         try {
             // Cek stok tersedia
@@ -67,23 +76,27 @@ class BorrowingController extends Controller
             // Set jatuh tempo = tanggal selesai (dari form peminjaman)
             $jatuh_tempo = $borrowing->tanggal_selesai;
 
-            // Update status dan jatuh tempo
+            // Simpan jaminan saat approval dan langsung aktifkan peminjaman
             $borrowing->update([
                 'status' => 'disetujui',
                 'jatuh_tempo' => $jatuh_tempo,
+                'jaminan_tipe' => $validated['jaminan_tipe'],
+                'ktp_diterima_at' => now(),
+                'ktp_diterima_oleh' => auth()->id(),
+                'ktp_dikembalikan_at' => null,
+                'ktp_dikembalikan_oleh' => null,
             ]);
 
-            // Buat notifikasi
             NotificationService::notifyBorrowingApproved($borrowing);
 
             ActivityLog::createLog(
                 auth()->id(),
-                'Menyetujui peminjaman ID: ' . $borrowing->id,
+                'Menyetujui peminjaman ID: ' . $borrowing->id . ' dengan jaminan ' . strtoupper($validated['jaminan_tipe']),
                 $borrowing
             );
 
             DB::commit();
-            return back()->with('success', 'Peminjaman berhasil disetujui.');
+            return back()->with('success', 'Peminjaman berhasil disetujui dengan jaminan ' . strtoupper($validated['jaminan_tipe']) . '.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal menyetujui peminjaman: ' . $e->getMessage());

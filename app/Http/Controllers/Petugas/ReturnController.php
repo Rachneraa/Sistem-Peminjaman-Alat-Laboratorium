@@ -58,6 +58,7 @@ class ReturnController extends Controller
             'denda_kerusakan' => 'nullable|numeric|min:0',
             'abaikan_denda' => 'nullable|boolean',
             'alasan_abaikan_denda' => 'nullable|required_if:abaikan_denda,1|string|min:8',
+            'jaminan_dikembalikan' => 'nullable|boolean',
             'keterangan' => 'nullable|string',
         ]);
 
@@ -99,7 +100,13 @@ class ReturnController extends Controller
             ]);
 
             // Update status peminjaman
-            $borrowing->update(['status' => 'dikembalikan']);
+            $jaminanDikembalikan = $request->boolean('jaminan_dikembalikan');
+
+            $borrowing->update([
+                'status' => 'dikembalikan',
+                'ktp_dikembalikan_at' => $jaminanDikembalikan ? now() : $borrowing->ktp_dikembalikan_at,
+                'ktp_dikembalikan_oleh' => $jaminanDikembalikan ? auth()->id() : $borrowing->ktp_dikembalikan_oleh,
+            ]);
 
             ActivityLog::createLog(
                 auth()->id(),

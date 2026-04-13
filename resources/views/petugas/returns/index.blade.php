@@ -44,7 +44,7 @@
                         $isOverdue = $tanggalSelesai && now()->startOfDay()->gt(\Carbon\Carbon::parse($tanggalSelesai)->startOfDay());
                         $estimatedFine = $borrowing->calculateEstimatedFine();
                     @endphp
-                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group {{ $isOverdue ? 'bg-red-500/[0.03]' : '' }}" data-borrowing-id="{{ $borrowing->id }}" data-estimated-fine="{{ (int) $estimatedFine['denda'] }}" data-estimated-days="{{ (int) $estimatedFine['terlambat_hari'] }}">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group {{ $isOverdue ? 'bg-red-500/[0.03]' : '' }}" data-borrowing-id="{{ $borrowing->id }}" data-estimated-fine="{{ (int) $estimatedFine['denda'] }}" data-estimated-days="{{ (int) $estimatedFine['terlambat_hari'] }}" data-jaminan-tipe="{{ $borrowing->jaminan_tipe ?? 'jaminan' }}">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -223,6 +223,16 @@
                     <input type="number" name="denda_kerusakan" min="0" step="1000" value="0" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all" placeholder="0">
                     <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-1 uppercase tracking-wide">Periksa kondisi alat dan masukkan jumlah denda jika ada kerusakan.</p>
                 </div>
+                <div class="mb-4 p-3 rounded-lg border border-gray-200 dark:border-gray-700/50 bg-gray-50 dark:bg-background-dark/40">
+                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2" id="jaminanTypeLabel">Jaminan: -</p>
+                    <label class="inline-flex items-start gap-2 cursor-pointer">
+                        <input type="checkbox" name="jaminan_dikembalikan" value="1" checked class="mt-1 rounded border-gray-300 text-primary focus:ring-primary">
+                        <span class="text-xs text-gray-700 dark:text-gray-300">
+                            Jaminan sudah dikembalikan ke peminjam
+                            <span class="block text-[10px] text-gray-500 dark:text-gray-500 uppercase tracking-wide">Hilangkan centang jika jaminan belum diserahkan kembali.</span>
+                        </span>
+                    </label>
+                </div>
                 <div class="mb-6">
                     <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Keterangan / Catatan Kondisi</label>
                     <textarea name="keterangan" rows="3" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-3 transition-all" placeholder="Catatan kondisi alat, kerusakan yang ditemukan, dll..."></textarea>
@@ -259,6 +269,7 @@ function showReturnModal(borrowingId, actionUrl) {
     const abaikanCheckbox = document.getElementById('abaikanDendaCheckbox');
     const reasonWrap = document.getElementById('abaikanDendaReasonWrap');
     const reasonInput = document.getElementById('alasanAbaikanDendaInput');
+    const jaminanTypeLabel = document.getElementById('jaminanTypeLabel');
 
     if (abaikanCheckbox) abaikanCheckbox.checked = false;
     if (reasonWrap) reasonWrap.classList.add('hidden');
@@ -272,6 +283,7 @@ function showReturnModal(borrowingId, actionUrl) {
     if (row) {
         const estimatedFine = Number(row.dataset.estimatedFine || 0);
         const estimatedDays = Number(row.dataset.estimatedDays || 0);
+        const jaminanTipe = String(row.dataset.jaminanTipe || '-').replaceAll('_', ' ').toUpperCase();
 
         if (fineDisplay) {
             fineDisplay.value = `Rp ${estimatedFine.toLocaleString('id-ID')}`;
@@ -280,6 +292,9 @@ function showReturnModal(borrowingId, actionUrl) {
             fineCaption.textContent = estimatedDays > 0
                 ? `Terlambat ${estimatedDays} hari. Denda otomatis dihitung sistem.`
                 : 'Tidak ada keterlambatan.';
+        }
+        if (jaminanTypeLabel) {
+            jaminanTypeLabel.textContent = `Jaminan: ${jaminanTipe}`;
         }
 
         const toolsCell = row.querySelector('td:nth-child(3)'); // Kolom Daftar Alat (Index 3)

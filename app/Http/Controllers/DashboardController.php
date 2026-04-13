@@ -28,7 +28,7 @@ class DashboardController extends Controller
             'total_categories' => Category::count(),
             'tools_tersedia' => Tool::where('status', 'tersedia')->sum('stok'),
             'tools_dipinjam' => Tool::where('status', 'dipinjam')->count(),
-            'pending_borrowings' => Borrowing::where('status', 'menunggu')->count(),
+            'pending_borrowings' => Borrowing::whereIn('status', ['menunggu', 'menunggu_jaminan'])->count(),
             'active_borrowings' => Borrowing::where('status', 'disetujui')->count(),
             'overdue_borrowings' => Borrowing::where('status', 'disetujui')
                 ->where('jatuh_tempo', '<', now())
@@ -182,7 +182,7 @@ class DashboardController extends Controller
     public function petugas()
     {
         $stats = [
-            'pending_borrowings' => Borrowing::where('status', 'menunggu')->count(),
+            'pending_borrowings' => Borrowing::whereIn('status', ['menunggu', 'menunggu_jaminan'])->count(),
             'active_borrowings' => Borrowing::where('status', 'disetujui')->count(),
             'overdue_borrowings' => Borrowing::where('status', 'disetujui')
                 ->where('jatuh_tempo', '<', now())
@@ -195,7 +195,7 @@ class DashboardController extends Controller
         ];
 
         $pending_borrowings = Borrowing::with(['user', 'borrowingDetails.tool'])
-            ->where('status', 'menunggu')
+            ->whereIn('status', ['menunggu', 'menunggu_jaminan'])
             ->latest()
             ->limit(3)
             ->get();
@@ -228,7 +228,7 @@ class DashboardController extends Controller
                 ->where('status', 'disetujui')
                 ->count(),
             'pending_borrowings' => Borrowing::where('user_id', $user->id)
-                ->where('status', 'menunggu')
+                ->whereIn('status', ['menunggu', 'menunggu_jaminan'])
                 ->count(),
             'returned_borrowings' => Borrowing::where('user_id', $user->id)
                 ->where('status', 'dikembalikan')

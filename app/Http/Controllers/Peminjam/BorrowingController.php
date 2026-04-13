@@ -21,7 +21,7 @@ class BorrowingController extends Controller
     {
         $borrowings = Borrowing::with(['borrowingDetails.tool'])
             ->where('user_id', Auth::id())
-            ->whereIn('status', ['menunggu', 'disetujui', 'menunggu_pengembalian'])
+            ->whereIn('status', ['menunggu', 'menunggu_jaminan', 'disetujui', 'menunggu_pengembalian'])
             ->latest()
             ->paginate(10);
         return view('peminjam.borrowings.index', compact('borrowings'));

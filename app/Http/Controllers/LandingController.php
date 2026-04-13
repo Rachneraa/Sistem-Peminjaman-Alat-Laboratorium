@@ -19,7 +19,7 @@ class LandingController extends Controller
 
         // 2. Alat yang sedang dipinjam atau masih menunggu proses
         $borrowedTools = BorrowingDetail::whereHas('borrowing', function ($query) {
-            $query->whereIn('status', ['menunggu', 'disetujui', 'menunggu_pengembalian']);
+            $query->whereIn('status', ['menunggu', 'menunggu_jaminan', 'disetujui', 'menunggu_pengembalian']);
         })->sum('jumlah');
 
         // 3. Total alat fisik tetap stabil: tersedia + sedang dipinjam + rusak + perbaikan

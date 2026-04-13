@@ -125,6 +125,7 @@
                     <div class="flex gap-2">
                         <form method="POST" action="{{ route('petugas.borrowings.approve', $borrowing) }}" class="flex-1">
                             @csrf
+                            <input type="hidden" name="jaminan_tipe" value="ktp">
                             <button type="submit" class="w-full px-3 py-1.5 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded uppercase tracking-wider transition-colors flex items-center justify-center gap-1">
                                 <span class="material-symbols-outlined text-[16px]">check</span> Accept
                             </button>

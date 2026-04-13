@@ -70,7 +70,7 @@ class BorrowingController extends Controller
             'user_id' => 'required|exists:users,id',
             'tanggal_pinjam' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_pinjam',
-            'status' => 'required|in:menunggu,disetujui,ditolak,menunggu_pengembalian,dikembalikan',
+            'status' => 'required|in:menunggu,menunggu_jaminan,disetujui,ditolak,menunggu_pengembalian,dikembalikan',
             'tools' => 'required|array|min:1',
             'tools.*.tool_id' => 'required|exists:tools,id',
             'tools.*.jumlah' => 'required|integer|min:1',
@@ -79,8 +79,8 @@ class BorrowingController extends Controller
 
         DB::beginTransaction();
         try {
-            // Cek stok tersedia jika status menunggu atau disetujui
-            if (in_array($validated['status'], ['menunggu', 'disetujui'])) {
+            // Cek stok tersedia jika status menunggu, menunggu_jaminan, atau disetujui
+            if (in_array($validated['status'], ['menunggu', 'menunggu_jaminan', 'disetujui'])) {
                 foreach ($validated['tools'] as $item) {
                     $tool = Tool::find($item['tool_id']);
                     if (!$tool->isAvailable($item['jumlah'])) {
@@ -109,8 +109,8 @@ class BorrowingController extends Controller
                 ]);
             }
 
-            // Jika status menunggu atau disetujui, kurangi stok
-            if (in_array($validated['status'], ['menunggu', 'disetujui'])) {
+            // Jika status menunggu, menunggu_jaminan, atau disetujui, kurangi stok
+            if (in_array($validated['status'], ['menunggu', 'menunggu_jaminan', 'disetujui'])) {
                 foreach ($borrowing->borrowingDetails as $detail) {
                     $tool = Tool::find($detail->tool_id);
                     $tool->decrement('stok', $detail->jumlah);
@@ -154,7 +154,7 @@ class BorrowingController extends Controller
             'user_id' => 'required|exists:users,id',
             'tanggal_pinjam' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_pinjam',
-            'status' => 'required|in:menunggu,disetujui,ditolak,menunggu_pengembalian,dikembalikan',
+            'status' => 'required|in:menunggu,menunggu_jaminan,disetujui,ditolak,menunggu_pengembalian,dikembalikan',
             'tools' => 'required|array|min:1',
             'tools.*.tool_id' => 'required|exists:tools,id',
             'tools.*.jumlah' => 'required|integer|min:1',
@@ -166,8 +166,8 @@ class BorrowingController extends Controller
             $oldStatus = $borrowing->status;
             $newStatus = $validated['status'];
 
-            // Kembalikan stok jika sebelumnya menunggu atau disetujui
-            if (in_array($oldStatus, ['menunggu', 'disetujui']) && !in_array($newStatus, ['menunggu', 'disetujui'])) {
+            // Kembalikan stok jika sebelumnya menunggu/menunggu_jaminan/disetujui lalu berubah ke status non-aktif
+            if (in_array($oldStatus, ['menunggu', 'menunggu_jaminan', 'disetujui']) && !in_array($newStatus, ['menunggu', 'menunggu_jaminan', 'disetujui'])) {
                 foreach ($borrowing->borrowingDetails as $detail) {
                     $tool = Tool::find($detail->tool_id);
                     $tool->increment('stok', $detail->jumlah);
@@ -200,8 +200,8 @@ class BorrowingController extends Controller
             // Refresh relasi
             $borrowing->load('borrowingDetails');
 
-            // Jika status baru menunggu atau disetujui, kurangi stok
-            if (in_array($newStatus, ['menunggu', 'disetujui'])) {
+            // Jika status baru menunggu/menunggu_jaminan/disetujui, kurangi stok
+            if (in_array($newStatus, ['menunggu', 'menunggu_jaminan', 'disetujui'])) {
                 // Cek stok tersedia
                 foreach ($validated['tools'] as $item) {
                     $tool = Tool::find($item['tool_id']);
@@ -243,8 +243,8 @@ class BorrowingController extends Controller
     {
         DB::beginTransaction();
         try {
-            // Kembalikan stok alat jika status menunggu atau disetujui
-            if (in_array($borrowing->status, ['menunggu', 'disetujui'])) {
+            // Kembalikan stok alat jika status menunggu/menunggu_jaminan/disetujui
+            if (in_array($borrowing->status, ['menunggu', 'menunggu_jaminan', 'disetujui'])) {
                 foreach ($borrowing->borrowingDetails as $detail) {
                     $tool = $detail->tool;
                     $tool->increment('stok', $detail->jumlah);

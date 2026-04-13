@@ -32,7 +32,7 @@
                         @elseif($borrowing->status == 'dikembalikan') bg-blue-500/10 text-blue-400 border-blue-500/20
                         @else bg-yellow-500/10 text-yellow-400 border-yellow-500/20
                         @endif">
-                        {{ ucfirst($borrowing->status) }}
+                            {{ ucfirst(str_replace('_', ' ', $borrowing->status)) }}
                     </span>
                 </div>
             </div>
@@ -124,6 +124,37 @@
         </div>
     </div>
 
+    <div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl p-6 mb-6 industrial-border">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700/50 pb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-500">badge</span>
+            Jaminan
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1">Tipe Jaminan</p>
+                <p class="font-medium text-gray-900 dark:text-white uppercase">{{ strtoupper(str_replace('_', ' ', $borrowing->jaminan_tipe ?? '-')) }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1">Status Jaminan</p>
+                @if($borrowing->ktp_diterima_at)
+                    <p class="font-medium text-green-500">Jaminan sudah diterima</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $borrowing->ktp_diterima_at->format('d/m/Y H:i') }}</p>
+                @else
+                    <p class="font-medium text-amber-500">Belum ada data jaminan</p>
+                @endif
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1">Pengembalian Jaminan</p>
+                @if($borrowing->ktp_dikembalikan_at)
+                    <p class="font-medium text-green-500">Jaminan sudah dikembalikan</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $borrowing->ktp_dikembalikan_at->format('d/m/Y H:i') }}</p>
+                @else
+                    <p class="font-medium text-gray-500">Belum dikembalikan</p>
+                @endif
+            </div>
+        </div>
+    </div>
+
     @if($borrowing->status == 'menunggu')
         <div class="bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/5 rounded-xl p-6 mb-6 industrial-border">
             <h2 class="text-lg font-bold text-gray-900 dark:text-white mb-6 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700/50 pb-4 flex items-center gap-2">
@@ -133,6 +164,7 @@
             <div class="flex gap-4">
                 <form id="approveForm" method="POST" action="{{ route('petugas.borrowings.approve', $borrowing) }}">
                     @csrf
+                    <input type="hidden" name="jaminan_tipe" id="approveGuaranteeInput" value="ktp">
                     <button type="button" class="h-12 px-6 bg-green-600 text-white hover:bg-green-500 rounded-lg font-bold uppercase tracking-wider transition-all inline-flex items-center gap-2 shadow-lg shadow-green-600/20" onclick="handleApproveSingle()">
                         <span class="material-symbols-outlined text-[20px]">check_circle</span>
                         Setujui Peminjaman
@@ -227,6 +259,41 @@
     </div>
 </div>
 
+<!-- Modal Jaminan -->
+<div id="guaranteeModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+    <div class="relative bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/10 w-full max-w-md shadow-2xl rounded-xl industrial-border">
+        <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-500">security</span>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-wider">Pilih Jaminan</h3>
+            </div>
+            <button onclick="closeGuaranteeModal()" class="text-gray-400 hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Jaminan Sebagai Apa?</label>
+                <select id="guaranteeTypeSelect" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all">
+                    <option value="ktp">KTP</option>
+                    <option value="sim">SIM</option>
+                    <option value="kartu_pelajar">Kartu Pelajar</option>
+                    <option value="lainnya">Lainnya</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700/50">
+                <button type="button" onclick="closeGuaranteeModal()" class="px-4 py-2 bg-transparent border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 hover:text-white transition-all font-medium text-xs uppercase tracking-wider">Batal</button>
+                <button type="button" onclick="submitApproveWithGuarantee()" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg font-medium transition-all text-xs uppercase tracking-wider shadow-lg shadow-green-600/20 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                    Setujui
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Tolak -->
 <div id="rejectModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
     <div class="relative bg-white dark:bg-panel-dark border border-gray-200 dark:border-white/10 w-full max-w-md shadow-2xl rounded-xl industrial-border">
@@ -296,15 +363,20 @@
 
 <script>
 function handleApproveSingle() {
-    showConfirmModal({
-        title: 'Setujui Peminjaman',
-        message: 'Yakin ingin menyetujui peminjaman ini? Stok alat akan berkurang otomatis.',
-        type: 'success',
-        okText: 'Ya, Setujui',
-        onConfirm: function() {
-            document.getElementById('approveForm').submit();
-        }
-    });
+    document.getElementById('guaranteeTypeSelect').value = 'ktp';
+    document.getElementById('guaranteeModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeGuaranteeModal() {
+    document.getElementById('guaranteeModal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+function submitApproveWithGuarantee() {
+    const selectedGuarantee = document.getElementById('guaranteeTypeSelect').value;
+    document.getElementById('approveGuaranteeInput').value = selectedGuarantee;
+    document.getElementById('approveForm').submit();
 }
 
 function showRejectModal() {
@@ -332,6 +404,7 @@ function closeReminderModal() {
 document.addEventListener('DOMContentLoaded', function() {
     const reminderModal = document.getElementById('reminderModal');
     const rejectModal = document.getElementById('rejectModal');
+    const guaranteeModal = document.getElementById('guaranteeModal');
     
     if (reminderModal) {
         reminderModal.addEventListener('click', function(e) {
@@ -349,6 +422,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    if (guaranteeModal) {
+        guaranteeModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeGuaranteeModal();
+            }
+        });
+    }
+
     // Close modals on ESC key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
@@ -357,6 +438,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (rejectModal && !rejectModal.classList.contains('hidden')) {
                 closeRejectModal();
+            }
+            if (guaranteeModal && !guaranteeModal.classList.contains('hidden')) {
+                closeGuaranteeModal();
             }
         }
     });
