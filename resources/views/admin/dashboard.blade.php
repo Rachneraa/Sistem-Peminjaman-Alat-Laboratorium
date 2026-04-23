@@ -10,7 +10,7 @@
         </div>
         <form id="database-export-form" method="POST" action="{{ route('admin.database.export') }}">
             @csrf
-            <button type="submit" id="database-export-btn"
+            <button type="button" id="database-export-btn" onclick="showDatabaseConfirmation()"
                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-primary hover:text-primary hover:bg-primary/5 transition">
                 <span class="material-symbols-outlined text-[18px]">database</span>
                 Export Database (.sql)
@@ -493,6 +493,60 @@
                     }
                 }
             });
+        });
+    </script>
+
+    <!-- DATABASE EXPORT CONFIRMATION MODAL -->
+    <div id="databaseConfirmationModal" class="hidden fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-panel-dark rounded-3xl p-8 max-w-md w-full mx-4 border border-gray-200 dark:border-white/10 shadow-2xl">
+            <div class="flex items-start gap-4 mb-4">
+                <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 dark:bg-amber-900/30">
+                    <span class="material-symbols-outlined text-amber-600 dark:text-amber-400">warning</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Konfirmasi Export Database</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Yakin ingin export database? File backup akan diunduh.</p>
+                </div>
+            </div>
+            <div class="flex gap-3 justify-end pt-4">
+                <button onclick="closeDatabaseConfirmation()"
+                    class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+                    Tidak
+                </button>
+                <button onclick="confirmDatabaseExport()"
+                    class="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-all">
+                    Ya, Export
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDatabaseConfirmation() {
+            document.getElementById('databaseConfirmationModal').classList.remove('hidden');
+        }
+
+        function closeDatabaseConfirmation() {
+            document.getElementById('databaseConfirmationModal').classList.add('hidden');
+        }
+
+        function confirmDatabaseExport() {
+            document.getElementById('database-export-form').submit();
+            closeDatabaseConfirmation();
+        }
+
+        // Close modal when pressing Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDatabaseConfirmation();
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('databaseConfirmationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDatabaseConfirmation();
+            }
         });
     </script>
 @endsection

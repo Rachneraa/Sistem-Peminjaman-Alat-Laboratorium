@@ -100,6 +100,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/borrowing', [ReportController::class, 'borrowingReport'])->name('reports.borrowing');
         Route::get('reports/return', [ReportController::class, 'returnReport'])->name('reports.return');
+        Route::get('reports/financial', [ReportController::class, 'financialReport'])->name('reports.financial');
+        Route::get('reports/goods', [ReportController::class, 'goodsReport'])->name('reports.goods');
     });
 
     // Petugas routes
@@ -127,6 +129,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reports', [PetugasReportController::class, 'index'])->name('reports.index');
         Route::get('reports/borrowing', [PetugasReportController::class, 'borrowingReport'])->name('reports.borrowing');
         Route::get('reports/return', [PetugasReportController::class, 'returnReport'])->name('reports.return');
+        Route::get('reports/financial', [PetugasReportController::class, 'financialReport'])->name('reports.financial');
+        Route::get('reports/goods', [PetugasReportController::class, 'goodsReport'])->name('reports.goods');
     });
 
     // Peminjam routes
