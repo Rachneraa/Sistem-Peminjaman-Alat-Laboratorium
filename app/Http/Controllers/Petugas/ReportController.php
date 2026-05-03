@@ -34,17 +34,19 @@ class ReportController extends Controller
         }
 
         // ===== TAB PERSEWAAN (Laporan Keuangan) - Semua peminjaman (belum & sudah kembali) =====
-        $returns = Borrowing::with(['user', 'borrowingDetails.tool', 'return'])
-            ->whereBetween('tanggal_pinjam', [$start_date, $end_date])
+        $returns = ReturnModel::with(['borrowing.user', 'borrowing.borrowingDetails.tool'])
+            ->whereHas('borrowing', function ($query) use ($start_date, $end_date) {
+                $query->whereBetween('tanggal_pinjam', [$start_date, $end_date]);
+            })
             ->paginate(10);
 
-        $totalTransactions = $returns->count();
-        $totalLateFine = $returns->sum(function ($b) {
-            return $b->return?->denda ?? 0;
-        });
-        $totalDamageFine = $returns->sum(function ($b) {
-            return $b->return?->denda_kerusakan ?? 0;
-        });
+        $totalTransactions = $returns->total();
+        $totalLateFine = ReturnModel::whereHas('borrowing', function ($query) use ($start_date, $end_date) {
+            $query->whereBetween('tanggal_pinjam', [$start_date, $end_date]);
+        })->sum('denda');
+        $totalDamageFine = ReturnModel::whereHas('borrowing', function ($query) use ($start_date, $end_date) {
+            $query->whereBetween('tanggal_pinjam', [$start_date, $end_date]);
+        })->sum('denda_kerusakan');
 
         // ===== TAB BARANG (Laporan Alat) =====
         $borrowings = Borrowing::with(['borrowingDetails.tool', 'return'])

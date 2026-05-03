@@ -58,16 +58,11 @@ class ToolController extends Controller
             'stok' => 'required|integer|min:0',
             'stok_rusak' => 'required|integer|min:0',
             'stok_perbaikan' => 'required|integer|min:0',
-            // 'kondisi' => 'required|in:baik,rusak,perlu_perbaikan', // Removed as per request
+            'harga_asli' => 'required|numeric|min:0',
+            'denda_per_hari' => 'required|numeric|min:0',
             'status' => 'required|in:tersedia,dipinjam,rusak,perbaikan',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
-        // Set default kondisi if not present (since we removed it from form but DB needs it if not nullable default)
-        // DB migration shows default 'baik', so it's handled there if omitted, but let's be safe if model doesn't strip it.
-        // Actually $fillable includes it. Let's merge default if needed or just let DB handle it.
-        // We actally removed it from validation, so it won't be in $validated.
-        // If DB has default, we are good. Migration says default('baik').
 
         // Handle upload gambar
         if ($request->hasFile('gambar')) {
@@ -121,7 +116,8 @@ class ToolController extends Controller
             'stok' => 'required|integer|min:0',
             'stok_rusak' => 'required|integer|min:0',
             'stok_perbaikan' => 'required|integer|min:0',
-            //'kondisi' => 'required|in:baik,rusak,perlu_perbaikan',
+            'harga_asli' => 'required|numeric|min:0',
+            'denda_per_hari' => 'required|numeric|min:0',
             'status' => 'required|in:tersedia,dipinjam,rusak,perbaikan',
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);

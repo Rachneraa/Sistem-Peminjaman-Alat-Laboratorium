@@ -43,8 +43,23 @@
                         $tanggalSelesai = $borrowing->tanggal_selesai ?? $borrowing->jatuh_tempo;
                         $isOverdue = $tanggalSelesai && now()->startOfDay()->gt(\Carbon\Carbon::parse($tanggalSelesai)->startOfDay());
                         $estimatedFine = $borrowing->calculateEstimatedFine();
+                        
+                        // Prepare tools data as JSON
+                        $toolsData = $borrowing->borrowingDetails->map(function($detail) {
+                            return [
+                                'id' => $detail->tool_id,
+                                'nama' => $detail->tool->nama_alat,
+                                'jumlah_pinjam' => $detail->jumlah,
+                                'harga_asli' => $detail->tool->harga_asli ?? 0,
+                            ];
+                        })->toJson();
                     @endphp
-                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group {{ $isOverdue ? 'bg-red-500/[0.03]' : '' }}" data-borrowing-id="{{ $borrowing->id }}" data-estimated-fine="{{ (int) $estimatedFine['denda'] }}" data-estimated-days="{{ (int) $estimatedFine['terlambat_hari'] }}" data-jaminan-tipe="{{ $borrowing->jaminan_tipe ?? 'jaminan' }}">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group {{ $isOverdue ? 'bg-red-500/[0.03]' : '' }}" 
+                        data-borrowing-id="{{ $borrowing->id }}" 
+                        data-estimated-fine="{{ (int) $estimatedFine['denda'] }}" 
+                        data-estimated-days="{{ (int) $estimatedFine['terlambat_hari'] }}" 
+                        data-jaminan-tipe="{{ $borrowing->jaminan_tipe ?? 'jaminan' }}"
+                        data-tools='{{ $toolsData }}'>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -191,8 +206,8 @@
                 <!-- Informasi Alat yang Dikembalikan -->
                 <div class="mb-6 p-4 bg-gray-50 dark:bg-background-dark/50 rounded-lg border border-gray-200 dark:border-gray-700/50">
                     <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-3">Alat yang Dikembalikan:</p>
-                    <div id="returnToolsList" class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                        <!-- Akan diisi oleh JavaScript -->
+                    <div id="returnToolsList" class="space-y-4">
+                        <!-- Akan diisi oleh JavaScript dengan input per alat -->
                     </div>
                 </div>
                 
@@ -219,9 +234,9 @@
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Denda Kerusakan (Rp)</label>
-                    <input type="number" name="denda_kerusakan" min="0" step="1000" value="0" class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5 transition-all" placeholder="0">
-                    <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-1 uppercase tracking-wide">Periksa kondisi alat dan masukkan jumlah denda jika ada kerusakan.</p>
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Total Denda Kerusakan (Otomatis)</label>
+                    <input type="text" id="totalDendaKerusakanDisplay" readonly class="w-full bg-gray-100 dark:bg-background-dark/70 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg block p-2.5 transition-all font-bold" value="Rp 0">
+                    <p class="text-[10px] text-gray-500 dark:text-gray-500 mt-1 uppercase tracking-wide">Dihitung otomatis dari harga asli × persen kerusakan per alat.</p>
                 </div>
                 <div class="mb-4 p-3 rounded-lg border border-gray-200 dark:border-gray-700/50 bg-gray-50 dark:bg-background-dark/40">
                     <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2" id="jaminanTypeLabel">Jaminan: -</p>
@@ -250,6 +265,54 @@
 </div>
 
 <script>
+let currentBorrowingTools = [];
+
+function validatePersenKerusakan(input, index) {
+    let value = parseFloat(input.value);
+    
+    // Jika kosong atau NaN, set ke 0
+    if (isNaN(value) || input.value === '') {
+        input.value = 0;
+        updateJumlahKembali(index);
+        return;
+    }
+    
+    // Jika negatif, set ke 0
+    if (value < 0) {
+        input.value = 0;
+    }
+    
+    // Jika lebih dari 100, potong jadi 100
+    if (value > 100) {
+        input.value = 100;
+    }
+    
+    updateJumlahKembali(index);
+}
+
+function validateJumlahRusak(input, index, maxJumlah) {
+    let value = parseInt(input.value);
+    
+    // Jika kosong atau NaN, set ke 0
+    if (isNaN(value) || input.value === '') {
+        input.value = 0;
+        updateJumlahKembali(index);
+        return;
+    }
+    
+    // Jika negatif, set ke 0
+    if (value < 0) {
+        input.value = 0;
+    }
+    
+    // Jika lebih dari jumlah pinjam, potong jadi max
+    if (value > maxJumlah) {
+        input.value = maxJumlah;
+    }
+    
+    updateJumlahKembali(index);
+}
+
 function showReminderModal(borrowingId, actionUrl) {
     document.getElementById('reminderForm').action = actionUrl;
     document.getElementById('reminderModal').classList.remove('hidden');
@@ -259,6 +322,53 @@ function showReminderModal(borrowingId, actionUrl) {
 function closeReminderModal() {
     document.getElementById('reminderModal').classList.add('hidden');
     document.body.style.overflow = '';
+}
+
+function calculateTotalDendaKerusakan() {
+    let total = 0;
+    currentBorrowingTools.forEach((tool, index) => {
+        const jumlahRusak = parseInt(document.getElementById(`tool_${index}_jumlah_rusak`)?.value || 0);
+        const persenKerusakan = parseFloat(document.getElementById(`tool_${index}_persen_kerusakan`)?.value || 0);
+        const hargaAsli = parseFloat(tool.harga_asli || 0);
+        
+        const dendaItem = (hargaAsli * persenKerusakan / 100) * jumlahRusak;
+        total += dendaItem;
+    });
+    
+    const displayElement = document.getElementById('totalDendaKerusakanDisplay');
+    if (displayElement) {
+        displayElement.value = `Rp ${total.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+    }
+    
+    return total;
+}
+
+function updateJumlahKembali(index) {
+    const tool = currentBorrowingTools[index];
+    const jumlahRusakInput = document.getElementById(`tool_${index}_jumlah_rusak`);
+    const jumlahKembaliInput = document.getElementById(`tool_${index}_jumlah_kembali`);
+    const persenKerusakanInput = document.getElementById(`tool_${index}_persen_kerusakan`);
+    const dendaItemDisplay = document.getElementById(`tool_${index}_denda_display`);
+    
+    if (!jumlahRusakInput || !jumlahKembaliInput) return;
+    
+    const jumlahRusak = parseInt(jumlahRusakInput.value || 0);
+    const jumlahPinjam = parseInt(tool.jumlah_pinjam || 0);
+    const jumlahKembali = jumlahPinjam - jumlahRusak;
+    
+    jumlahKembaliInput.value = Math.max(0, jumlahKembali);
+    
+    // Calculate denda for this item
+    const persenKerusakan = parseFloat(persenKerusakanInput?.value || 0);
+    const hargaAsli = parseFloat(tool.harga_asli || 0);
+    const dendaItem = (hargaAsli * persenKerusakan / 100) * jumlahRusak;
+    
+    if (dendaItemDisplay) {
+        dendaItemDisplay.textContent = `Rp ${dendaItem.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+    }
+    
+    // Update total
+    calculateTotalDendaKerusakan();
 }
 
 function showReturnModal(borrowingId, actionUrl) {
@@ -278,12 +388,20 @@ function showReturnModal(borrowingId, actionUrl) {
         reasonInput.required = false;
     }
 
-    // Ambil data alat dari tabel
+    // Ambil data dari row
     const row = document.querySelector(`tr[data-borrowing-id="${borrowingId}"]`);
     if (row) {
         const estimatedFine = Number(row.dataset.estimatedFine || 0);
         const estimatedDays = Number(row.dataset.estimatedDays || 0);
         const jaminanTipe = String(row.dataset.jaminanTipe || '-').replaceAll('_', ' ').toUpperCase();
+        const toolsDataStr = row.dataset.tools || '[]';
+        
+        try {
+            currentBorrowingTools = JSON.parse(toolsDataStr);
+        } catch (e) {
+            currentBorrowingTools = [];
+            console.error('Failed to parse tools data:', e);
+        }
 
         if (fineDisplay) {
             fineDisplay.value = `Rp ${estimatedFine.toLocaleString('id-ID')}`;
@@ -297,10 +415,73 @@ function showReturnModal(borrowingId, actionUrl) {
             jaminanTypeLabel.textContent = `Jaminan: ${jaminanTipe}`;
         }
 
-        const toolsCell = row.querySelector('td:nth-child(3)'); // Kolom Daftar Alat (Index 3)
+        // Generate input fields per tool
         const toolsList = document.getElementById('returnToolsList');
-        if (toolsCell && toolsList) {
-            toolsList.innerHTML = toolsCell.innerHTML.replace(/<ul[^>]*>|<\/ul>/g, '').replace(/<li[^>]*>/g, '<div class="py-1 border-b border-gray-700/50 last:border-0 flex items-center gap-2">').replace(/<\/li>/g, '</div>').replace(/<span class="w-1.5 h-1.5 rounded-full bg-gray-500"><\/span>/g, '<span class="material-symbols-outlined text-[16px] text-gray-500">construction</span>');
+        if (toolsList && currentBorrowingTools.length > 0) {
+            toolsList.innerHTML = currentBorrowingTools.map((tool, index) => `
+                <div class="p-3 bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-primary text-[18px]">construction</span>
+                        <span class="text-sm font-bold text-gray-900 dark:text-white">${tool.nama}</span>
+                        <span class="text-xs text-gray-500">(Dipinjam: ${tool.jumlah_pinjam})</span>
+                    </div>
+                    
+                    <input type="hidden" name="tools[${index}][tool_id]" value="${tool.id}">
+                    <input type="hidden" name="tools[${index}][jumlah_pinjam]" value="${tool.jumlah_pinjam}">
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase">Kembali Bagus</label>
+                            <input type="number" 
+                                id="tool_${index}_jumlah_kembali"
+                                name="tools[${index}][jumlah_kembali]" 
+                                value="${tool.jumlah_pinjam}" 
+                                min="0" 
+                                max="${tool.jumlah_pinjam}"
+                                readonly
+                                class="w-full bg-gray-100 dark:bg-background-dark/70 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg p-2">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase">Kembali Rusak</label>
+                            <input type="number" 
+                                id="tool_${index}_jumlah_rusak"
+                                name="tools[${index}][jumlah_rusak]" 
+                                value="0" 
+                                min="0" 
+                                max="${tool.jumlah_pinjam}"
+                                onchange="updateJumlahKembali(${index})"
+                                oninput="validateJumlahRusak(this, ${index}, ${tool.jumlah_pinjam})"
+                                class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg p-2 focus:ring-primary focus:border-primary">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase">Persen Kerusakan (%)</label>
+                        <input type="number" 
+                            id="tool_${index}_persen_kerusakan"
+                            name="tools[${index}][persen_kerusakan]" 
+                            value="0" 
+                            min="0" 
+                            max="100"
+                            step="0.01"
+                            onchange="updateJumlahKembali(${index})"
+                            oninput="validatePersenKerusakan(this, ${index})"
+                            class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg p-2 focus:ring-primary focus:border-primary"
+                            placeholder="0-100">
+                        <p class="text-[9px] text-gray-500 mt-1">Harga Asli: Rp ${parseFloat(tool.harga_asli || 0).toLocaleString('id-ID')}</p>
+                    </div>
+                    
+                    <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">Denda Item:</span>
+                            <span id="tool_${index}_denda_display" class="text-sm font-bold text-red-500">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Initialize calculations
+            calculateTotalDendaKerusakan();
         }
     }
 
@@ -311,6 +492,7 @@ function showReturnModal(borrowingId, actionUrl) {
 function closeReturnModal() {
     document.getElementById('returnModal').classList.add('hidden');
     document.body.style.overflow = '';
+    currentBorrowingTools = [];
 }
 
 // Close modals on background click

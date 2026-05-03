@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Borrowing;
 use App\Models\ReturnModel;
+use App\Models\ReturnDetail;
 use App\Models\Tool;
 use App\Models\ActivityLog;
 use App\Services\NotificationService;
@@ -55,20 +56,23 @@ class ReturnController extends Controller
 
         $validated = $request->validate([
             'tanggal_kembali' => 'required|date',
-            'denda_kerusakan' => 'nullable|numeric|min:0',
             'abaikan_denda' => 'nullable|boolean',
             'alasan_abaikan_denda' => 'nullable|required_if:abaikan_denda,1|string|min:8',
             'jaminan_dikembalikan' => 'nullable|boolean',
             'keterangan' => 'nullable|string',
+            'tools' => 'required|array',
+            'tools.*.tool_id' => 'required|exists:tools,id',
+            'tools.*.jumlah_kembali' => 'required|integer|min:0',
+            'tools.*.jumlah_rusak' => 'required|integer|min:0',
+            'tools.*.persen_kerusakan' => 'required|numeric|min:0|max:100',
         ]);
 
         DB::beginTransaction();
         try {
-            // Hitung denda berdasarkan tanggal selesai (tanggal_selesai dari form)
+            // Hitung denda keterlambatan
             $tanggal_kembali = \Carbon\Carbon::parse($validated['tanggal_kembali']);
             $tanggal_selesai = $borrowing->tanggal_selesai ?? $borrowing->jatuh_tempo;
 
-            // Denda dihitung dari tanggal selesai, bukan jatuh tempo
             $dendaPerHari = $borrowing->calculateDendaPerHariTotal();
             $dendaData = DendaHelper::hitungDenda($tanggal_kembali, $tanggal_selesai, $dendaPerHari);
             $dendaKeterlambatanAwal = (float) $dendaData['denda'];
@@ -76,13 +80,42 @@ class ReturnController extends Controller
             $alasanAbaikanDenda = $abaikanDenda ? trim((string) ($validated['alasan_abaikan_denda'] ?? '')) : null;
             $dendaKeterlambatanFinal = $abaikanDenda ? 0 : $dendaKeterlambatanAwal;
 
-            // Denda kerusakan dari input petugas
-            $dendaKerusakan = $validated['denda_kerusakan'] ?? 0;
+            // Hitung total denda kerusakan dari semua alat
+            $totalDendaKerusakan = 0;
+            $returnDetailsData = [];
 
-            // Kembalikan stok alat dan update status
-            foreach ($borrowing->borrowingDetails as $detail) {
-                $tool = Tool::find($detail->tool_id);
-                $tool->increment('stok', $detail->jumlah);
+            foreach ($validated['tools'] as $toolData) {
+                $tool = Tool::find($toolData['tool_id']);
+                if (!$tool) continue;
+
+                $jumlahKembali = (int) $toolData['jumlah_kembali'];
+                $jumlahRusak = (int) $toolData['jumlah_rusak'];
+                $persenKerusakan = (float) $toolData['persen_kerusakan'];
+                $hargaAsli = (float) ($tool->harga_asli ?? 0);
+
+                // Hitung denda kerusakan untuk item ini
+                // Rumus: harga_asli × persen_kerusakan × jumlah_rusak
+                $dendaKerusakanItem = ($hargaAsli * $persenKerusakan / 100) * $jumlahRusak;
+                $totalDendaKerusakan += $dendaKerusakanItem;
+
+                // Simpan data untuk return_details
+                $returnDetailsData[] = [
+                    'tool_id' => $tool->id,
+                    'jumlah_kembali' => $jumlahKembali,
+                    'jumlah_rusak' => $jumlahRusak,
+                    'persen_kerusakan' => $persenKerusakan,
+                    'denda_kerusakan_item' => $dendaKerusakanItem,
+                ];
+
+                // Update stok alat
+                // Stok bagus bertambah sesuai jumlah_kembali
+                $tool->increment('stok', $jumlahKembali);
+                
+                // Stok rusak bertambah sesuai jumlah_rusak
+                if ($jumlahRusak > 0) {
+                    $tool->increment('stok_rusak', $jumlahRusak);
+                }
+                
                 $tool->updateStatusFromStock();
             }
 
@@ -93,11 +126,16 @@ class ReturnController extends Controller
                 'denda' => $dendaKeterlambatanFinal,
                 'denda_keterlambatan_awal' => $dendaKeterlambatanAwal,
                 'terlambat_hari' => $dendaData['terlambat_hari'],
-                'denda_kerusakan' => $dendaKerusakan,
+                'denda_kerusakan' => $totalDendaKerusakan,
                 'denda_diabaikan' => $abaikanDenda,
                 'alasan_abaikan_denda' => $alasanAbaikanDenda,
                 'keterangan' => $validated['keterangan'],
             ]);
+
+            // Simpan return_details
+            foreach ($returnDetailsData as $detailData) {
+                $return->returnDetails()->create($detailData);
+            }
 
             // Update status peminjaman
             $jaminanDikembalikan = $request->boolean('jaminan_dikembalikan');
@@ -118,7 +156,7 @@ class ReturnController extends Controller
             NotificationService::notifyReturnProcessed($return);
 
             DB::commit();
-            $totalDenda = $dendaKeterlambatanFinal + $dendaKerusakan;
+            $totalDenda = $dendaKeterlambatanFinal + $totalDendaKerusakan;
             $message = 'Pengembalian berhasil diproses.';
 
             $dendaDetails = [];
@@ -127,8 +165,8 @@ class ReturnController extends Controller
             } elseif ($abaikanDenda && $dendaKeterlambatanAwal > 0) {
                 $dendaDetails[] = 'Keterlambatan diabaikan: Rp ' . number_format($dendaKeterlambatanAwal, 0, ',', '.');
             }
-            if ($dendaKerusakan > 0) {
-                $dendaDetails[] = 'Kerusakan: Rp ' . number_format($dendaKerusakan, 0, ',', '.');
+            if ($totalDendaKerusakan > 0) {
+                $dendaDetails[] = 'Kerusakan: Rp ' . number_format($totalDendaKerusakan, 0, ',', '.');
             }
 
             if (count($dendaDetails) > 0) {

@@ -14,31 +14,37 @@ class LandingController extends Controller
      */
     public function index()
     {
-        // 1. Alat siap dipinjam (stok yang masih tersedia)
+        // 1. Total alat lab (semua alat yang terdaftar)
+        $totalTools = Tool::count();
+
+        // 2. Alat tersedia (stok yang masih tersedia untuk dipinjam)
         $availableTools = Tool::sum('stok');
 
-        // 2. Alat yang sedang dipinjam atau masih menunggu proses
-        $borrowedTools = BorrowingDetail::whereHas('borrowing', function ($query) {
-            $query->whereIn('status', ['menunggu', 'menunggu_jaminan', 'disetujui', 'menunggu_pengembalian']);
-        })->sum('jumlah');
+        // 3. Peminjaman bulan ini
+        $borrowingsThisMonth = \App\Models\Borrowing::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
 
-        // 3. Total alat fisik tetap stabil: tersedia + sedang dipinjam + rusak + perbaikan
-        $toolStockTotals = Tool::selectRaw('COALESCE(SUM(stok_rusak + stok_perbaikan), 0) as total')
-            ->value('total');
+        // 4. Persentase alat tersedia
+        $totalStockCapacity = Tool::selectRaw('SUM(stok + stok_rusak + stok_perbaikan) as total')->value('total');
+        $availabilityPercentage = $totalStockCapacity > 0 ? round(($availableTools / $totalStockCapacity) * 100) : 0;
 
-        $totalTools = $availableTools + $borrowedTools + $toolStockTotals;
-
-        // 4. Alat Terbaru (Latest 3 added)
-        $latestTools = Tool::with('category')->latest()->take(3)->get();
-
-        // 5. Alat Unggulan (Top 6 tools with stock > 0, sorted by stock lowest to highest)
+        // 5. Alat untuk katalog (6 alat dengan gambar dan stok > 0)
         $featuredTools = Tool::with('category')
             ->where('stok', '>', 0)
-            ->orderBy('stok', 'asc')
+            ->whereNotNull('gambar')
+            ->where('gambar', '!=', '')
+            ->orderBy('stok', 'desc')
             ->take(6)
             ->get();
 
-        return view('landing.index', compact('totalTools', 'availableTools', 'latestTools', 'featuredTools'));
+        return view('landing.index', compact(
+            'totalTools',
+            'availableTools',
+            'borrowingsThisMonth',
+            'availabilityPercentage',
+            'featuredTools'
+        ));
     }
 
     /**
@@ -57,7 +63,7 @@ class LandingController extends Controller
         }
 
         if ($categoryId) {
-            $toolsQuery->where('category_id', $categoryId);
+            $toolsQuery->where('kategori_id', $categoryId);
         }
 
         switch ($sort) {
@@ -75,8 +81,8 @@ class LandingController extends Controller
                 break;
         }
 
-        // View All Tools with pagination
-        $tools = $toolsQuery->paginate(9)->withQueryString();
+        // View All Tools with pagination (10 items per page)
+        $tools = $toolsQuery->paginate(10)->withQueryString();
 
         // Get all categories
         $categories = Category::orderBy('nama_kategori')->get();

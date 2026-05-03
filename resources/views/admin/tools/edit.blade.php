@@ -74,6 +74,24 @@
 
                 <div class="mb-6">
                     <label
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Harga Asli (Rp)</label>
+                    <input type="number" name="harga_asli" value="{{ old('harga_asli', $tool->harga_asli ?? 0) }}" min="0" step="0.01"
+                        class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-3 transition-all"
+                        required placeholder="Masukkan harga asli alat...">
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-2 uppercase tracking-wide">Harga ini digunakan untuk menghitung denda kerusakan</p>
+                </div>
+
+                <div class="mb-6">
+                    <label
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Denda Per Hari (Rp)</label>
+                    <input type="number" name="denda_per_hari" value="{{ old('denda_per_hari', $tool->denda_per_hari ?? 5000) }}" min="0" step="0.01"
+                        class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-3 transition-all"
+                        required placeholder="Masukkan denda per hari...">
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-2 uppercase tracking-wide">Denda keterlambatan per hari</p>
+                </div>
+
+                <div class="mb-6">
+                    <label
                         class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest pl-1">Status</label>
                     <select name="status"
                         class="w-full bg-gray-50 dark:bg-background-dark border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block p-3 transition-all"

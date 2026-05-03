@@ -91,11 +91,18 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-wider">Laporan
                             Keuangan</h3>
-                        <button onclick="showConfirmation('{{ route('admin.reports.financial', ['start_date' => $start_date->format('Y-m-d'), 'end_date' => $end_date->format('Y-m-d')]) }}')"
-                            class="inline-flex items-center gap-2 rounded-lg bg-primary hover:bg-primary/90 px-4 py-2 text-sm font-semibold text-white transition-all">
-                            <span class="material-symbols-outlined text-lg">download</span>
-                            Export Data
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="window.print()"
+                                class="inline-flex items-center gap-2 rounded-lg bg-gray-600 hover:bg-gray-700 px-4 py-2 text-sm font-semibold text-white transition-all">
+                                <span class="material-symbols-outlined text-lg">print</span>
+                                Cetak
+                            </button>
+                            <button onclick="showConfirmation('{{ route('admin.reports.financial', ['start_date' => $start_date->format('Y-m-d'), 'end_date' => $end_date->format('Y-m-d')]) }}')"
+                                class="inline-flex items-center gap-2 rounded-lg bg-primary hover:bg-primary/90 px-4 py-2 text-sm font-semibold text-white transition-all">
+                                <span class="material-symbols-outlined text-lg">download</span>
+                                Export PDF
+                            </button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table
@@ -178,11 +185,18 @@
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-wider">Laporan Barang
                         </h3>
-                        <button onclick="showConfirmation('{{ route('admin.reports.goods', ['start_date' => $start_date->format('Y-m-d'), 'end_date' => $end_date->format('Y-m-d')]) }}')"
-                            class="inline-flex items-center gap-2 rounded-lg bg-primary hover:bg-primary/90 px-4 py-2 text-sm font-semibold text-white transition-all">
-                            <span class="material-symbols-outlined text-lg">download</span>
-                            Export Data
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="window.print()"
+                                class="inline-flex items-center gap-2 rounded-lg bg-gray-600 hover:bg-gray-700 px-4 py-2 text-sm font-semibold text-white transition-all">
+                                <span class="material-symbols-outlined text-lg">print</span>
+                                Cetak
+                            </button>
+                            <button onclick="showConfirmation('{{ route('admin.reports.goods', ['start_date' => $start_date->format('Y-m-d'), 'end_date' => $end_date->format('Y-m-d')]) }}')"
+                                class="inline-flex items-center gap-2 rounded-lg bg-primary hover:bg-primary/90 px-4 py-2 text-sm font-semibold text-white transition-all">
+                                <span class="material-symbols-outlined text-lg">download</span>
+                                Export PDF
+                            </button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table
@@ -331,4 +345,150 @@
             }
         }
     </script>
+
+    <style>
+        @media print {
+            /* Hide navigation and UI elements */
+            nav,
+            aside,
+            .sidebar,
+            button,
+            .pagination,
+            form,
+            .mb-6:has(h1) {
+                display: none !important;
+            }
+
+            /* Hide tab buttons */
+            .flex.flex-wrap.gap-4.mb-6 {
+                display: none !important;
+            }
+
+            /* Show only the active tab content */
+            #tab-persewaan.hidden,
+            #tab-barang.hidden {
+                display: none !important;
+            }
+
+            /* Reset page layout */
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            /* Show main content */
+            .space-y-6 {
+                display: block !important;
+            }
+
+            /* Remove borders and backgrounds */
+            .bg-white,
+            .dark\:bg-panel-dark,
+            .bg-gradient-to-br,
+            .rounded-3xl,
+            .industrial-border {
+                background: white !important;
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+
+            /* KPI Cards styling */
+            .grid.grid-cols-1.md\:grid-cols-3 > div {
+                background: white !important;
+                border: 1px solid #ddd !important;
+                page-break-inside: avoid;
+            }
+
+            /* Table container */
+            .overflow-x-auto {
+                overflow: visible !important;
+            }
+
+            /* Table styling */
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                page-break-inside: auto;
+                margin-top: 20px;
+            }
+
+            thead {
+                display: table-header-group;
+                background: #f3f4f6 !important;
+            }
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            th, td {
+                border: 1px solid #ddd !important;
+                padding: 8px !important;
+                text-align: left;
+            }
+
+            /* Text colors for print */
+            .text-white,
+            .dark\:text-white,
+            .text-gray-900,
+            .dark\:text-gray-300,
+            .text-gray-700 {
+                color: black !important;
+            }
+
+            .text-gray-400,
+            .dark\:text-gray-400,
+            .text-gray-500 {
+                color: #666 !important;
+            }
+
+            /* Colored text for conditions */
+            .text-emerald-600,
+            .dark\:text-emerald-400 {
+                color: #059669 !important;
+            }
+
+            .text-amber-600,
+            .dark\:text-amber-400 {
+                color: #d97706 !important;
+            }
+
+            .text-red-600,
+            .dark\:text-red-400 {
+                color: #dc2626 !important;
+            }
+
+            /* Page settings */
+            @page {
+                margin: 1.5cm;
+                size: A4;
+            }
+
+            /* Print header */
+            body::before {
+                content: "LAPORAN LABPINJAM";
+                display: block;
+                text-align: center;
+                font-size: 20px;
+                font-weight: bold;
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #333;
+            }
+
+            /* Add date range info */
+            .space-y-6::before {
+                content: "Periode: {{ $start_date->format('d/m/Y') }} - {{ $end_date->format('d/m/Y') }}";
+                display: block;
+                text-align: center;
+                font-size: 12px;
+                margin-bottom: 20px;
+                color: #666;
+            }
+        }
+    </style>
 @endsection

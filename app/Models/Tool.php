@@ -19,6 +19,7 @@ class Tool extends Model
         'stok_rusak',
         'stok_perbaikan',
         'denda_per_hari',
+        'harga_asli',
         'kondisi',
         'status',
         'deskripsi',
@@ -32,6 +33,7 @@ class Tool extends Model
     {
         return [
             'denda_per_hari' => 'decimal:2',
+            'harga_asli' => 'decimal:2',
         ];
     }
 

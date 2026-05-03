@@ -50,5 +50,13 @@ class ReturnModel extends Model
     {
         return $this->belongsTo(Borrowing::class);
     }
+
+    /**
+     * Relasi one-to-many dengan return_details
+     */
+    public function returnDetails()
+    {
+        return $this->hasMany(ReturnDetail::class, 'return_id');
+    }
 }
 

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV - LabPinjam Full Stack Developer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #3b82f6;
+            --accent-light: #60a5fa;
+            --success: #10b981;
+            --text-dark: #1a1a1a;
+            --text-light: #333333;
+            --text-muted: #666666;
+            --border: #dddddd;
+            --bg-light: #f9f9f9;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: white;
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            section {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* ═══ HEADER ═══ */
+        header {
+            background: white;
+            border-bottom: 3px solid var(--accent);
+            padding: 2rem 5%;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            color: var(--accent);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .header-info span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            z-index: 999;
+            transition: all 0.3s;
+        }
+
+        .print-btn:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+        }
+
+        @media print {
+            .print-btn {
+                display: none;
+            }
+        }
+
+        /* ═══ HERO ═══ */
+        .hero {
+            min-height: auto;
+            display: none;
+        }
+
+        /* ═══ SECTION ═══ */
+        section {
+            padding: 2rem 5%;
+            position: relative;
+            background: white;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            color: var(--text-dark);
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 0.5rem;
+        }
+
+        .section-subtitle {
+            text-align: left;
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* ═══ PROJECTS ═══ */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .project-card {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s;
+            padding: 1.5rem;
+        }
+
+        .project-card:hover {
+            transform: none;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .project-image {
+            display: none;
+        }
+
+        .project-content {
+            padding: 0;
+        }
+
+        .project-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .project-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .project-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tech-badge {
+            background: var(--accent);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .project-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* ═══ SKILLS ═══ */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .skill-category {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .skill-category:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .skill-category h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .skill-list {
+            list-style: none;
+        }
+
+        .skill-list li {
+            padding: 0.4rem 0;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .skill-list li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* ═══ STATS ═══ */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-box {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-box:hover {
+            border-color: var(--accent);
+            transform: none;
+        }
+
+        .stat-box-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-box-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* ═══ FOOTER ═══ */
+        footer {
+            background: white;
+            border-top: 3px solid var(--accent);
+            padding: 2rem 5%;
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .social-links {
+            display: none;
+        }
+
+        /* ═══ RESPONSIVE ═══ */
+        @media (max-width: 768px) {
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .project-stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- PRINT BUTTON -->
+    <button class="print-btn no-print" onclick="window.print()">🖨️ Print CV</button>
+
+    <!-- HEADER -->
+    <header>
+        <h1 class="header-title">Full Stack Web Developer</h1>
+        <p class="header-subtitle">Spesialis Sistem Manajemen Terintegrasi</p>
+        <div class="header-info">
+            <span>📧 your.email@example.com</span>
+            <span>📱 +62 812 3456 7890</span>
+            <span>📍 Indonesia</span>
+            <span>🔗 github.com/yourprofile</span>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <!-- ABOUT -->
+        <section id="about">
+            <h2 class="section-title">Tentang Saya</h2>
+            <p style="color: var(--text-muted); line-height: 1.8;">
+                Saya adalah Full Stack Web Developer dengan pengalaman dalam membangun aplikasi web yang scalable dan user-friendly. 
+                Spesialisasi saya adalah dalam pengembangan sistem manajemen terintegrasi menggunakan Laravel, React, dan MySQL. 
+                Saya memiliki keahlian dalam backend development, frontend design, database architecture, dan UI/UX design. 
+                Berdedikasi untuk menghasilkan kode berkualitas tinggi dan solusi inovatif yang memenuhi kebutuhan bisnis.
+            </p>
+        </section>
+
+        <!-- PROJECT: LABPINJAM -->
+        <section id="projects">
+            <h2 class="section-title">🎯 Proyek Utama: LabPinjam</h2>
+            
+            <div class="projects-grid">
+                <div class="project-card">
+                    <h3 class="project-title">LabPinjam — Sistem Manajemen Peminjaman Alat Laboratorium</h3>
+                    <p class="project-desc">
+                        Platform digital terintegrasi untuk mengelola proses peminjaman dan pengembalian alat laboratorium di universitas. 
+                        Sistem ini mendukung 3 role pengguna (Admin, Petugas, Peminjam) dengan workflow lengkap, dashboard analytics, 
+                        notifikasi real-time, dan laporan komprehensif.
+                    </p>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--text-dark); font-weight: 700; margin-bottom: 0.5rem;">Tech Stack:</h4>
+                        <div class="project-tech">
+                            <span class="tech-badge">Laravel 11</span>
+                            <span class="tech-badge">React 19</span>
+                            <span class="tech-badge">MySQL</span>
+                            <span class="tech-badge">Tailwind CSS</span>
+                            <span class="tech-badge">Vite</span>
+                            <span class="tech-badge">GSAP</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--text-dark); font-weight: 700; margin-bottom: 0.5rem;">Fitur Utama:</h4>
+                        <ul style="list-style: none; color: var(--text-muted); font-size: 0.95rem;">
+                            <li>✓ Sistem autentikasi dengan role-based access control</li>
+                            <li>✓ CRUD lengkap untuk alat, kategori, dan user management</li>
+                            <li>✓ Workflow peminjaman: Pengajuan → Persetujuan → Pinjam → Pengembalian</li>
+                            <li>✓ Sistem denda otomatis untuk keterlambatan dan kerusakan</li>
+                            <li>✓ Dashboard analytics dengan chart interaktif untuk setiap role</li>
+                            <li>✓ Notifikasi real-time untuk peminjaman, pengembalian, dan denda</li>
+                            <li>✓ Import/Export data Excel untuk bulk management</li>
+                            <li>✓ Laporan PDF untuk bukti peminjaman dan statistik</li>
+                            <li>✓ Landing page modern dengan animasi smooth scroll</li>
+                            <li>✓ Mobile-responsive design untuk semua perangkat</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--text-dark); font-weight: 700; margin-bottom: 0.5rem;">Database Schema:</h4>
+                        <ul style="list-style: none; color: var(--text-muted); font-size: 0.95rem;">
+                            <li>✓ 9 tabel utama (users, tools, categories, borrowings, returns, dll)</li>
+                            <li>✓ Relasi one-to-many dan many-to-many yang terstruktur</li>
+                            <li>✓ Migrations dan seeders untuk setup otomatis</li>
+                            <li>✓ Activity logging untuk audit trail</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--text-dark); font-weight: 700; margin-bottom: 0.5rem;">User Roles & Permissions:</h4>
+                        <ul style="list-style: none; color: var(--text-muted); font-size: 0.95rem;">
+                            <li>✓ <strong>Admin:</strong> Full access - kelola semua aspek sistem</li>
+                            <li>✓ <strong>Petugas:</strong> Operasional - setujui peminjaman, proses pengembalian</li>
+                            <li>✓ <strong>Peminjam:</strong> End user - lihat alat, ajukan peminjaman, riwayat</li>
+                        </ul>
+                    </div>
+
+                    <div class="project-stats">
+                        <div class="stat">
+                            <div class="stat-value">9</div>
+                            <div class="stat-label">Database Models</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">20+</div>
+                            <div class="stat-label">Pages & Views</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">3</div>
+                            <div class="stat-label">User Roles</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SKILLS -->
+        <section id="skills">
+            <h2 class="section-title">Keahlian Teknis</h2>
+            
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3>Backend Development</h3>
+                    <ul class="skill-list">
+                        <li>PHP (Native & Laravel Framework)</li>
+                        <li>RESTful API Design</li>
+                        <li>Authentication & Authorization</li>
+                        <li>Database Optimization</li>
+                        <li>Security Best Practices</li>
+                    </ul>
+                </div>
+
+                <div class="skill-category">
+                    <h3>Frontend Development</h3>
+                    <ul class="skill-list">
+                        <li>React 19 & Hooks</li>
+                        <li>HTML5 & CSS3</li>
+                        <li>JavaScript ES6+</li>
+                        <li>Tailwind CSS</li>
+                        <li>Responsive Design</li>
+                    </ul>
+                </div>
+
+                <div class="skill-category">
+                    <h3>Database & Architecture</h3>
+                    <ul class="skill-list">
+                        <li>MySQL / MariaDB</li>
+                        <li>Database Design & Normalization</li>
+                        <li>Query Optimization</li>
+                        <li>Migrations & Seeders</li>
+                        <li>Relationships & Indexing</li>
+                    </ul>
+                </div>
+
+                <div class="skill-category">
+                    <h3>Tools & DevOps</h3>
+                    <ul class="skill-list">
+                        <li>Git & GitHub</li>
+                        <li>Vite & Build Tools</li>
+                        <li>Laragon / XAMPP</li>
+                        <li>Linux CLI</li>
+                        <li>Package Managers</li>
+                    </ul>
+                </div>
+
+                <div class="skill-category">
+                    <h3>UI/UX & Design</h3>
+                    <ul class="skill-list">
+                        <li>UI/UX Design Principles</li>
+                        <li>Glassmorphism & Modern Styles</li>
+                        <li>Dark/Light Mode Implementation</li>
+                        <li>Animation & Effects (GSAP)</li>
+                        <li>Accessibility (WCAG)</li>
+                    </ul>
+                </div>
+
+                <div class="skill-category">
+                    <h3>Security & Best Practices</h3>
+                    <ul class="skill-list">
+                        <li>Brute-force Protection</li>
+                        <li>CSRF & XSS Prevention</li>
+                        <li>Data Validation & Sanitization</li>
+                        <li>Role-based Access Control</li>
+                        <li>Activity Logging & Audit Trail</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- EXPERIENCE -->
+        <section id="experience">
+            <h2 class="section-title">Pengalaman & Pencapaian</h2>
+            
+            <div style="color: var(--text-muted); line-height: 1.8;">
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--text-dark); font-weight: 700; margin-bottom: 0.5rem;">Full Stack Web Developer</h4>
+                    <p style="font-size: 0.95rem;">
+                        Mengembangkan sistem manajemen peminjaman alat laboratorium (LabPinjam) dengan teknologi Laravel 11 dan React 19. 
+                        Bertanggung jawab atas seluruh aspek development dari database design, backend API, frontend UI, hingga deployment.
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--text-dark); font-weight: 700; margin-bottom: 0.5rem;">Keahlian yang Ditunjukkan:</h4>
+                    <ul style="list-style: none;">
+                        <li>✓ Full-stack development dengan Laravel & React</li>
+                        <li>✓ Database architecture dan optimization</li>
+                        <li>✓ RESTful API design dan implementation</li>
+                        <li>✓ Modern UI/UX design dengan glassmorphism</li>
+                        <li>✓ Role-based access control dan security</li>
+                        <li>✓ Dashboard analytics dan reporting</li>
+                        <li>✓ Mobile-responsive design</li>
+                        <li>✓ Performance optimization</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- EDUCATION -->
+        <section id="education">
+            <h2 class="section-title">Pendidikan & Sertifikasi</h2>
+            
+            <div style="color: var(--text-muted); line-height: 1.8;">
+                <div style="margin-bottom: 1rem;">
+                    <h4 style="color: var(--text-dark); font-weight: 700;">Pendidikan Formal</h4>
+                    <p style="font-size: 0.95rem;">
+                        Pendidikan di bidang Teknologi Informasi / Sistem Informasi dengan fokus pada web development dan database management.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 style="color: var(--text-dark); font-weight: 700;">Keahlian Mandiri</h4>
+                    <p style="font-size: 0.95rem;">
+                        Pembelajaran berkelanjutan melalui praktik langsung, dokumentasi resmi, dan community resources. 
+                        Menguasai teknologi terkini dalam web development ecosystem.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <p style="margin-bottom: 0.5rem;">© 2026 Full Stack Web Developer</p>
+            <p style="font-size: 0.9rem;">Fokus pada LabPinjam — Sistem Manajemen Peminjaman Alat Laboratorium</p>
+        </div>
+    </footer>
+
+    <script>
+        // Print function
+        function printCV() {
+            window.print();
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
